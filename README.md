@@ -9,3 +9,8 @@
 ### 如何使用
 ----
 参考Demo.e
+
+### 使用本模块开发的
+----
++ 命运2 QQ机器人 https://github.com/molehzy/d2bot
+
