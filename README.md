@@ -13,4 +13,4 @@
 ### 使用本模块开发的
 ----
 + 命运2 QQ机器人 https://github.com/molehzy/d2bot
-
++ 原神 QQ机器人 https://github.com/molehzy/GenshinBot
