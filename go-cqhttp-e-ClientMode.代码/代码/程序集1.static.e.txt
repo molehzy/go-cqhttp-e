@@ -1,0 +1,190 @@
+﻿.版本 2
+.支持库 e2ee
+.支持库 spec
+
+.程序集 程序集1
+.子程序 _启动子程序, 整数型, , 请在本子程序中放置易模块初始化代码
+    
+    _临时子程序 () ' 在初始化代码执行完毕后调用测试代码
+    返回 (0) ' 可以根据您的需要返回任意数值
+
+.子程序 _临时子程序
+    ' 本名称子程序用作测试程序用，仅在开发及调试环境中有效，编译发布程序前将被系统自动清空，请将所有用作测试的临时代码放在本子程序中。 ***注意不要修改本子程序的名称、参数及返回值类型。
+    
+
+.子程序 WS初始化
+    WS.初始化 (&WS收到消息, &WS连接成功, &WS连接失败, &WS断开连接)
+    
+
+.子程序 WS收到消息
+    .参数 消息类型, 整数型
+    .参数 消息句柄, 整数型
+    .局部变量 文本, 文本型
+    .局部变量 数据, 字节集
+    .局部变量 data, 存取键值表
+
+    .如果真 (消息类型 ＝ #WS类型_文本_Text)
+        数据 ＝ WS.取回消息数据 (消息句柄)
+        文本 ＝ 编码_Utf8到Ansi (数据)
+        
+        调用子程序 (WS消息, , , 文本)
+        
+        .判断开始 (data.从JSON载入 (文本, #文本编码格式_UTF8, , ))
+            
+            .判断开始 (data.取文本 (“//post_type”) ＝ “meta_event”)
+                返回 ()
+                
+            .判断 (data.取文本 (“//post_type”) ＝ “message”)
+                
+                .判断开始 (data.取文本 (“//message_type”) ＝ “private”)
+                    调用子程序 (私聊消息, , , data.取文本 (“//message”), data.取文本 (“//message_id”), data.取文本 (“//sender.nickname”), data.取文本 (“//sender.user_id”), data.取文本 (“//sub_type”))
+                    返回 ()
+                    
+                .判断 (data.取文本 (“//message_type”) ＝ “group”)
+                    调用子程序 (群聊消息, , , data.取文本 (“//group_id”), data.取文本 (“//message”), data.取文本 (“//message_id”), data.取文本 (“//sender.card”), data.取文本 (“//sender.nickname”), data.取文本 (“//sender.role”), data.取文本 (“//sender.user_id”), data.取文本 (“//sub_type”))
+                    返回 ()
+                .默认
+                    
+                .判断结束
+                
+            .判断 (data.取文本 (“//post_type”) ＝ “notice”)
+                
+                .判断开始 (data.取文本 (“//notice_type”) ＝ “group_upload”)
+                    调用子程序 (通知消息, , , data.取文本 (“//notice_type”), data.取文本 (“//file.name”), data.取文本 (“//file.size”), data.取文本 (“//file.url”), data.取文本 (“//group_id”), data.取文本 (“//user_id”), “”, “”, “”, “”)
+                    返回 ()
+                    
+                .判断 (data.取文本 (“//notice_type”) ＝ “group_admin”)
+                    调用子程序 (通知消息, , , data.取文本 (“//notice_type”), “”, “”, “”, data.取文本 (“//group_id”), data.取文本 (“//user_id”), data.取文本 (“//sub_type”), “”, “”, “”)
+                    返回 ()
+                    
+                .判断 (data.取文本 (“//notice_type”) ＝ “group_decrease”)
+                    调用子程序 (通知消息, , , data.取文本 (“//notice_type”), “”, “”, “”, data.取文本 (“//group_id”), data.取文本 (“//user_id”), data.取文本 (“//sub_type”), data.取文本 (“//operator_id”), “”, “”)
+                    返回 ()
+                    
+                .判断 (data.取文本 (“//notice_type”) ＝ “group_increase”)
+                    调用子程序 (通知消息, , , data.取文本 (“//notice_type”), “”, “”, “”, data.取文本 (“//group_id”), data.取文本 (“//user_id”), data.取文本 (“//sub_type”), data.取文本 (“//operator_id”), “”, “”)
+                    返回 ()
+                    
+                .判断 (data.取文本 (“//notice_type”) ＝ “group_ban”)
+                    调用子程序 (通知消息, , , data.取文本 (“//notice_type”), “”, “”, “”, data.取文本 (“//group_id”), data.取文本 (“//user_id”), data.取文本 (“//sub_type”), data.取文本 (“//operator_id”), data.取文本 (“//duration”), “”)
+                    返回 ()
+                    
+                .判断 (data.取文本 (“//notice_type”) ＝ “friend_add”)
+                    调用子程序 (通知消息, , , data.取文本 (“//notice_type”), “”, “”, “”, “”, data.取文本 (“//user_id”), “”, “”, “”, “”)
+                    返回 ()
+                    
+                .判断 (data.取文本 (“//notice_type”) ＝ “group_recall”)
+                    调用子程序 (通知消息, , , data.取文本 (“//notice_type”), “”, “”, “”, data.取文本 (“//group_id”), data.取文本 (“//user_id”), “”, data.取文本 (“//operator_id”), “”, data.取文本 (“//message_id”))
+                    返回 ()
+                    
+                .判断 (data.取文本 (“//notice_type”) ＝ “friend_recall”)
+                    调用子程序 (通知消息, , , data.取文本 (“//notice_type”), “”, “”, “”, “”, data.取文本 (“//user_id”), “”, “”, “”, data.取文本 (“//message_id”))
+                    返回 ()
+                    
+                .判断 (data.取文本 (“//notice_type”) ＝ “offline_file”)
+                    调用子程序 (通知消息, , , data.取文本 (“//notice_type”), data.取文本 (“//file.name”), data.取文本 (“//file.size”), data.取文本 (“//file.url”), data.取文本 (“//user_id”), “”, “”, “”, “”)
+                    返回 ()
+                    
+                .默认
+                    
+                .判断结束
+                
+            .判断 (data.取文本 (“//post_type”) ＝ “request”)
+                
+                .判断开始 (data.取文本 (“//request_type”) ＝ “friend”)
+                    调用子程序 (请求消息, , , data.取文本 (“//request_type”), data.取文本 (“//sub_type”), data.取文本 (“//group_id”), data.取文本 (“//user_id”), data.取文本 (“//comment”), data.取文本 (“//flag”))
+                    返回 ()
+                    
+                .判断 (data.取文本 (“//request_type”) ＝ “group”)
+                    调用子程序 (请求消息, , , data.取文本 (“//request_type”), “”, “”, data.取文本 (“//user_id”), data.取文本 (“//comment”), data.取文本 (“//flag”))
+                    返回 ()
+                .默认
+                    
+                .判断结束
+                
+            .默认
+                
+            .判断结束
+            
+        .默认
+            调用子程序 (WS消息, , , “Json格式出错 - ” ＋ 文本)
+            调试输出 (文本)
+        .判断结束
+        
+    .如果真结束
+    
+
+.子程序 WS连接成功
+    调用子程序 (WS消息, , , “WS连接成功”)
+    
+
+.子程序 WS连接失败
+    调用子程序 (WS消息, , , “WS连接失败”)
+    
+
+.子程序 WS断开连接
+    调用子程序 (WS消息, , , “WS断开连接”)
+    
+
+.子程序 json实体处理, 文本型
+    .参数 文本, 文本型
+    .局部变量 tmp, 文本型
+
+    tmp ＝ 子文本替换 (文本, #换行符, “”, 1, , 真)
+    tmp ＝ 子文本替换 (tmp, “&”, 编码_Ansi到Unicode_文本型 (“&”) ＋ “;”, 1, , 真)
+    tmp ＝ 子文本替换 (tmp, “,”, 编码_Ansi到Unicode_文本型 (“,”) ＋ “;”, 1, , 真)
+    tmp ＝ 子文本替换 (tmp, “[”, 编码_Ansi到Unicode_文本型 (“[”) ＋ “;”, 1, , 真)
+    tmp ＝ 子文本替换 (tmp, “]”, 编码_Ansi到Unicode_文本型 (“]”) ＋ “;”, 1, , 真)
+    返回 (tmp)
+    
+
+.子程序 _private, , 公开, 私聊消息,示例代码
+    .参数 message, 文本型, , 消息内容
+    .参数 message_id, 文本型, , 消息 ID
+    .参数 nickname, 文本型, , 昵称
+    .参数 user_id, 文本型, , 发送者 QQ 号
+    .参数 sub_type, 文本型, , 消息子类型(friend、group、other)
+
+    
+
+.子程序 _group, , 公开, 群消息,示例代码
+    .参数 group_id, 文本型, , 群号
+    .参数 message, 文本型, , 消息内容
+    .参数 message_id, 文本型, , 消息 ID
+    .参数 card, 文本型, , 群名片／备注
+    .参数 nickname, 文本型, , 昵称
+    .参数 role, 文本型, , 角色，owner 或 admin 或 member
+    .参数 user_id, 文本型, , 发送者 QQ 号
+    .参数 sub_type, 文本型, , 消息子类型(normal、anonymous、notice)
+
+    
+
+.子程序 _notice, , 公开, 通知事件,示例代码
+    .参数 notice_type, 文本型, , 通知类型
+    .参数 name, 文本型, , 文件名
+    .参数 size, 文本型, , 文件大小（字节数）
+    .参数 url, 文本型, , 文件链接
+    .参数 group_id, 文本型, , 群号
+    .参数 user_id, 文本型, , QQ 号
+    .参数 sub_type, 文本型, , 事件子类型
+    .参数 operator_id, 文本型, , 操作者 QQ 号
+    .参数 duration, 文本型, , 禁言时长，单位秒
+    .参数 message_id, 文本型, , 被撤回的消息 ID
+
+    
+
+.子程序 _request, , 公开, 请求事件,示例代码
+    .参数 request_type, 文本型, , 请求类型
+    .参数 sub_type, 文本型, , 请求子类型
+    .参数 group_id, 文本型, , 群号
+    .参数 user_id, 文本型, , 发送请求的 QQ 号
+    .参数 comment, 文本型, , 验证信息
+    .参数 flag, 文本型, , 请求 flag，在调用处理请求的 API 时需要传入
+
+    
+
+.子程序 _ws, , 公开, ws客户端消息,示例代码
+    .参数 msg, 文本型
+
+    
+

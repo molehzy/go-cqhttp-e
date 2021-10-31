@@ -1,0 +1,28 @@
+﻿.版本 2
+
+.DLL命令 CoInitialize, , "ole32.dll", "CoInitialize", , 加载COM
+    .参数 pvReserved, 整数型, , 值为0
+
+.DLL命令 CoUninitialize, , "ole32.dll", "CoUninitialize", , 卸载COM
+
+.DLL命令 MultiByteToWideChar, 整数型, "Kernel32.dll", "MultiByteToWideChar", , 该函数映射一个字符串到一个宽字符（unicode）的字符
+    .参数 CodePage, 整数型
+    .参数 dwFlags, 整数型
+    .参数 lpMultiByteStr, 整数型
+    .参数 cchMultiByte, 整数型
+    .参数 lpWideCharStr, 整数型
+    .参数 cchWideChar, 整数型
+
+.DLL命令 WideCharToMultiByte, 整数型, "kernel32.dll", "WideCharToMultiByte"
+    .参数 CodePage, 整数型
+    .参数 dwFlags, 整数型
+    .参数 lpWideCharStr, 整数型
+    .参数 cchWideChar, 整数型
+    .参数 lpMultiByteStr, 整数型
+    .参数 cbMultiByte, 整数型
+    .参数 lpDefaultChar, 整数型
+    .参数 lpUsedDefaultChar, 整数型
+
+.DLL命令 lstrlenW, 整数型, "kernel32.dll", "lstrlenW"
+    .参数 lpString, 整数型, , 0
+

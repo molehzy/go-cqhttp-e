@@ -1,0 +1,23 @@
+﻿{
+    "Address": "",
+    "Author": "molehzy",
+    "BuilderVersion": {
+        "Major": 0,
+        "Minor": 2
+    },
+    "CompilePlugins": "",
+    "Copyright": "",
+    "Description": "",
+    "Email": "",
+    "ExportPublicClassMethod": false,
+    "FaxNumber": "",
+    "Homepage": "https://github.com/molehzy/go-cqhttp-e",
+    "Name": "go-cqhttp-e-ServerMode",
+    "ReleaseVersion": {
+        "Major": 1,
+        "Minor": 0
+    },
+    "TelephoneNumber": "",
+    "WriteVersion": true,
+    "ZipCode": ""
+}
