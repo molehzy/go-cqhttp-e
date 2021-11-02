@@ -2,13 +2,15 @@
 ----
 文本代码由 [e2txt](http://e2ee.jimstone.com.cn/downloads/) 生成, 文件夹内有e格式源码
 
+使用支持库 [e2ee](http://e2ee.jimstone.com.cn/downloads/)
+
 没有心跳包管理
 
 "post_message_format" 只支持 "string"
 
 "ClientMode" 为正向WS连接
 
-"ServerMode"为反向WS连接
+"ServerMode" 为反向WS连接
 
 ### 如何使用
 
