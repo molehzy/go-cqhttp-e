@@ -42,11 +42,11 @@
             .判断 (data.取文本 (“//post_type”) ＝ “message”)
                 
                 .判断开始 (data.取文本 (“//message_type”) ＝ “private”)
-                    调用子程序 (私聊消息, , , 客户, data.取文本 (“//message”), data.取文本 (“//message_id”), data.取文本 (“//sender.nickname”), data.取文本 (“//sender.user_id”), data.取文本 (“//sub_type”))
+                    调用子程序 (私聊消息, , , 客户, data.取文本 (“//message”), data.取文本 (“//message_id”), data.取文本 (“//sender.nickname”), data.取文本 (“//sender.user_id”), data.取文本 (“//sub_type”), data.取文本 (“//self_id”))
                     返回 ()
                     
                 .判断 (data.取文本 (“//message_type”) ＝ “group”)
-                    调用子程序 (群聊消息, , , 客户, data.取文本 (“//group_id”), data.取文本 (“//message”), data.取文本 (“//message_id”), data.取文本 (“//sender.card”), data.取文本 (“//sender.nickname”), data.取文本 (“//sender.role”), data.取文本 (“//sender.user_id”), data.取文本 (“//sub_type”))
+                    调用子程序 (群聊消息, , , 客户, data.取文本 (“//group_id”), data.取文本 (“//message”), data.取文本 (“//message_id”), data.取文本 (“//sender.card”), data.取文本 (“//sender.nickname”), data.取文本 (“//sender.role”), data.取文本 (“//sender.user_id”), data.取文本 (“//sub_type”), data.取文本 (“//self_id”))
                     返回 ()
                 .默认
                     
@@ -55,39 +55,39 @@
             .判断 (data.取文本 (“//post_type”) ＝ “notice”)
                 
                 .判断开始 (data.取文本 (“//notice_type”) ＝ “group_upload”)
-                    调用子程序 (通知消息, , , 客户, data.取文本 (“//notice_type”), data.取文本 (“//file.name”), data.取文本 (“//file.size”), data.取文本 (“//file.url”), data.取文本 (“//group_id”), data.取文本 (“//user_id”), “”, “”, “”, “”)
+                    调用子程序 (通知消息, , , 客户, data.取文本 (“//notice_type”), data.取文本 (“//file.name”), data.取文本 (“//file.size”), “”, data.取文本 (“//group_id”), data.取文本 (“//user_id”), “”, “”, “”, “”, data.取文本 (“//self_id”))
                     返回 ()
                     
                 .判断 (data.取文本 (“//notice_type”) ＝ “group_admin”)
-                    调用子程序 (通知消息, , , 客户, data.取文本 (“//notice_type”), “”, “”, “”, data.取文本 (“//group_id”), data.取文本 (“//user_id”), data.取文本 (“//sub_type”), “”, “”, “”)
+                    调用子程序 (通知消息, , , 客户, data.取文本 (“//notice_type”), “”, “”, “”, data.取文本 (“//group_id”), data.取文本 (“//user_id”), data.取文本 (“//sub_type”), “”, “”, “”, data.取文本 (“//self_id”))
                     返回 ()
                     
                 .判断 (data.取文本 (“//notice_type”) ＝ “group_decrease”)
-                    调用子程序 (通知消息, , , 客户, data.取文本 (“//notice_type”), “”, “”, “”, data.取文本 (“//group_id”), data.取文本 (“//user_id”), data.取文本 (“//sub_type”), data.取文本 (“//operator_id”), “”, “”)
+                    调用子程序 (通知消息, , , 客户, data.取文本 (“//notice_type”), “”, “”, “”, data.取文本 (“//group_id”), data.取文本 (“//user_id”), data.取文本 (“//sub_type”), data.取文本 (“//operator_id”), “”, “”, data.取文本 (“//self_id”))
                     返回 ()
                     
                 .判断 (data.取文本 (“//notice_type”) ＝ “group_increase”)
-                    调用子程序 (通知消息, , , 客户, data.取文本 (“//notice_type”), “”, “”, “”, data.取文本 (“//group_id”), data.取文本 (“//user_id”), data.取文本 (“//sub_type”), data.取文本 (“//operator_id”), “”, “”)
+                    调用子程序 (通知消息, , , 客户, data.取文本 (“//notice_type”), “”, “”, “”, data.取文本 (“//group_id”), data.取文本 (“//user_id”), data.取文本 (“//sub_type”), data.取文本 (“//operator_id”), “”, “”, data.取文本 (“//self_id”))
                     返回 ()
                     
                 .判断 (data.取文本 (“//notice_type”) ＝ “group_ban”)
-                    调用子程序 (通知消息, , , 客户, data.取文本 (“//notice_type”), “”, “”, “”, data.取文本 (“//group_id”), data.取文本 (“//user_id”), data.取文本 (“//sub_type”), data.取文本 (“//operator_id”), data.取文本 (“//duration”), “”)
+                    调用子程序 (通知消息, , , 客户, data.取文本 (“//notice_type”), “”, “”, “”, data.取文本 (“//group_id”), data.取文本 (“//user_id”), data.取文本 (“//sub_type”), data.取文本 (“//operator_id”), data.取文本 (“//duration”), “”, data.取文本 (“//self_id”))
                     返回 ()
                     
                 .判断 (data.取文本 (“//notice_type”) ＝ “friend_add”)
-                    调用子程序 (通知消息, , , 客户, data.取文本 (“//notice_type”), “”, “”, “”, “”, data.取文本 (“//user_id”), “”, “”, “”, “”)
+                    调用子程序 (通知消息, , , 客户, data.取文本 (“//notice_type”), “”, “”, “”, “”, data.取文本 (“//user_id”), “”, “”, “”, “”, data.取文本 (“//self_id”))
                     返回 ()
                     
                 .判断 (data.取文本 (“//notice_type”) ＝ “group_recall”)
-                    调用子程序 (通知消息, , , 客户, data.取文本 (“//notice_type”), “”, “”, “”, data.取文本 (“//group_id”), data.取文本 (“//user_id”), “”, data.取文本 (“//operator_id”), “”, data.取文本 (“//message_id”))
+                    调用子程序 (通知消息, , , 客户, data.取文本 (“//notice_type”), “”, “”, “”, data.取文本 (“//group_id”), data.取文本 (“//user_id”), “”, data.取文本 (“//operator_id”), “”, data.取文本 (“//message_id”), data.取文本 (“//self_id”))
                     返回 ()
                     
                 .判断 (data.取文本 (“//notice_type”) ＝ “friend_recall”)
-                    调用子程序 (通知消息, , , 客户, data.取文本 (“//notice_type”), “”, “”, “”, “”, data.取文本 (“//user_id”), “”, “”, “”, data.取文本 (“//message_id”))
+                    调用子程序 (通知消息, , , 客户, data.取文本 (“//notice_type”), “”, “”, “”, “”, data.取文本 (“//user_id”), “”, “”, “”, data.取文本 (“//message_id”), data.取文本 (“//self_id”))
                     返回 ()
                     
                 .判断 (data.取文本 (“//notice_type”) ＝ “offline_file”)
-                    调用子程序 (通知消息, , , 客户, data.取文本 (“//notice_type”), data.取文本 (“//file.name”), data.取文本 (“//file.size”), data.取文本 (“//file.url”), data.取文本 (“//user_id”), “”, “”, “”, “”)
+                    调用子程序 (通知消息, , , 客户, data.取文本 (“//notice_type”), data.取文本 (“//file.name”), data.取文本 (“//file.size”), data.取文本 (“//file.url”), data.取文本 (“//user_id”), “”, “”, “”, “”, data.取文本 (“//self_id”))
                     返回 ()
                     
                 .默认
@@ -97,11 +97,11 @@
             .判断 (data.取文本 (“//post_type”) ＝ “request”)
                 
                 .判断开始 (data.取文本 (“//request_type”) ＝ “friend”)
-                    调用子程序 (请求消息, , , 客户, data.取文本 (“//request_type”), data.取文本 (“//sub_type”), data.取文本 (“//group_id”), data.取文本 (“//user_id”), data.取文本 (“//comment”), data.取文本 (“//flag”))
+                    调用子程序 (请求消息, , , 客户, data.取文本 (“//request_type”), data.取文本 (“//sub_type”), data.取文本 (“//group_id”), data.取文本 (“//user_id”), data.取文本 (“//comment”), data.取文本 (“//flag”), data.取文本 (“//self_id”))
                     返回 ()
                     
                 .判断 (data.取文本 (“//request_type”) ＝ “group”)
-                    调用子程序 (请求消息, , , 客户, data.取文本 (“//request_type”), “”, “”, data.取文本 (“//user_id”), data.取文本 (“//comment”), data.取文本 (“//flag”))
+                    调用子程序 (请求消息, , , 客户, data.取文本 (“//request_type”), “”, “”, data.取文本 (“//user_id”), data.取文本 (“//comment”), data.取文本 (“//flag”), data.取文本 (“//self_id”))
                     返回 ()
                 .默认
                     
@@ -152,7 +152,8 @@
     .参数 message_id, 文本型, , 消息 ID
     .参数 nickname, 文本型, , 昵称
     .参数 user_id, 文本型, , 发送者 QQ 号
-    .参数 sub_type, 文本型, , 消息子类型(friend、group、other)
+    .参数 sub_type, 文本型, , 消息子类型, 如果是好友则是 friend, 如果是群临时会话则是 group, 如果是在群中自身发送则是 group_self
+    .参数 self_id, 文本型, , 收到事件的机器人 QQ 号
 
     
 
@@ -165,7 +166,8 @@
     .参数 nickname, 文本型, , 昵称
     .参数 role, 文本型, , 角色，owner 或 admin 或 member
     .参数 user_id, 文本型, , 发送者 QQ 号
-    .参数 sub_type, 文本型, , 消息子类型(normal、anonymous、notice)
+    .参数 sub_type, 文本型, , 消息子类型, 正常消息是 normal, 匿名消息是 anonymous, 系统提示 ( 如「管理员已禁止群内匿名聊天」 ) 是 notice
+    .参数 self_id, 文本型, , 收到事件的机器人 QQ 号
 
     
 
@@ -181,6 +183,7 @@
     .参数 operator_id, 文本型, , 操作者 QQ 号
     .参数 duration, 文本型, , 禁言时长，单位秒
     .参数 message_id, 文本型, , 被撤回的消息 ID
+    .参数 self_id, 文本型, , 收到事件的机器人 QQ 号
 
     
 
@@ -192,6 +195,7 @@
     .参数 user_id, 文本型, , 发送请求的 QQ 号
     .参数 comment, 文本型, , 验证信息
     .参数 flag, 文本型, , 请求 flag，在调用处理请求的 API 时需要传入
+    .参数 self_id, 文本型, , 收到事件的机器人 QQ 号
 
     
 
