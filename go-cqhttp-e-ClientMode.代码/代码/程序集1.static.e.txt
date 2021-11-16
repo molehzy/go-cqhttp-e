@@ -92,11 +92,11 @@
             .判断 (data.取文本 (“//post_type”) ＝ “request”)
                 
                 .判断开始 (data.取文本 (“//request_type”) ＝ “friend”)
-                    调用子程序 (请求消息, , , data.取文本 (“//request_type”), data.取文本 (“//sub_type”), data.取文本 (“//group_id”), data.取文本 (“//user_id”), data.取文本 (“//comment”), data.取文本 (“//flag”))
+                    调用子程序 (请求消息, , , data.取文本 (“//request_type”), “”, “”, data.取文本 (“//user_id”), data.取文本 (“//comment”), data.取文本 (“//flag”))
                     返回 ()
                     
                 .判断 (data.取文本 (“//request_type”) ＝ “group”)
-                    调用子程序 (请求消息, , , data.取文本 (“//request_type”), “”, “”, data.取文本 (“//user_id”), data.取文本 (“//comment”), data.取文本 (“//flag”))
+                    调用子程序 (请求消息, , , data.取文本 (“//request_type”), data.取文本 (“//sub_type”), data.取文本 (“//group_id”), data.取文本 (“//user_id”), data.取文本 (“//comment”), data.取文本 (“//flag”))
                     返回 ()
                 .默认
                     
