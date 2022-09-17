@@ -1,6 +1,6 @@
 ﻿[
     {
-        "CmdCount": 657,
+        "CmdCount": 682,
         "Guid": "d09f2340818511d396f6aaf844c7e325",
         "Key": "krnln",
         "MaxRefConstPos": 180,
@@ -9,18 +9,6 @@
         "Version": {
             "Major": 5,
             "Minor": 7
-        }
-    },
-    {
-        "CmdCount": 632,
-        "Guid": "AA50CDD5A14C4C5DB81BAE05DE4DDE6D",
-        "Key": "e2ee",
-        "MaxRefConstPos": 448,
-        "MaxRefObjectPos": 11,
-        "Name": "E2EE互联网服务器套件2.7.2",
-        "Version": {
-            "Major": 2,
-            "Minor": 0
         }
     },
     {

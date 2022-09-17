@@ -2,8 +2,6 @@
 ----
 文本代码由 [e2txt](http://e2ee.jimstone.com.cn/downloads/) 生成, 文件夹内有e格式源码
 
-使用支持库 [e2ee](http://e2ee.jimstone.com.cn/downloads/)
-
 没有心跳包管理
 
 "post_message_format" 只支持 "string"
@@ -22,3 +20,12 @@
 ----
 + 命运2 QQ机器人 https://github.com/molehzy/d2bot
 + 原神 QQ机器人 https://github.com/molehzy/GenshinBot
+
+----
+20220917
+
+弃用E2EE 改用HP-Socket和YYJSON
+
+https://github.com/ldcsaa/HP-Socket
+
+https://github.com/ibireme/yyjson

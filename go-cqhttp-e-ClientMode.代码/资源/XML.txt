@@ -1,1 +1,0 @@
-<?xml version="1.0" encoding="Utf-8"?><msg serviceID="1" templateID="1" action="web" brief="[BRIEF]" sourceMsgId="0" url="[URL]" flag="0" adverSign="0" multiMsgFlag="0"><item  layout="2"><picture cover="[PURL]" w="0" h="0"/><title>[TITLE]</title><summary>[SUM]</summary></item><source name="[SOURCENAME]" icon="[SOURCEICON]" action="app" appid="-1"/></msg>

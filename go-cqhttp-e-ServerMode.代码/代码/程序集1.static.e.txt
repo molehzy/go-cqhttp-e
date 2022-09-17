@@ -1,5 +1,4 @@
 ﻿.版本 2
-.支持库 e2ee
 .支持库 spec
 
 .程序集 程序集1
@@ -12,97 +11,93 @@
     ' 本名称子程序用作测试程序用，仅在开发及调试环境中有效，编译发布程序前将被系统自动清空，请将所有用作测试的临时代码放在本子程序中。 ***注意不要修改本子程序的名称、参数及返回值类型。
     
 
-.子程序 WS初始化
-    .参数 端口, 整数型
-
-    WS.初始化 (WebServer, 端口, &WS客户进入事件, &WS客户退出事件, &WS收到消息事件)
-    
-
-.子程序 WS收到消息事件
-    .参数 客户句柄, 整数型
-    .参数 消息类型, 整数型
-    .参数 消息句柄, 整数型
+.子程序 WS收到消息
+    .参数 Server, 整数型
+    .参数 dwConnID, 整数型
+    .参数 iOperationCode, 字节型
+    .参数 pData, 整数型
+    .参数 Len, 整数型
     .局部变量 文本, 文本型
     .局部变量 数据, 字节集
     .局部变量 客户, 整数型
-    .局部变量 data, 存取键值表
+    .局部变量 data, yyJSON解析
 
-    .如果真 (消息类型 ＝ #WS类型_文本_Text)
-        数据 ＝ WS.取回消息数据 (消息句柄)
-        文本 ＝ 编码_Utf8到Ansi (数据)
-        客户 ＝ 客户句柄
+    .如果真 (iOperationCode ＝ 1)
+        数据 ＝ 指针到字节集 (pData, Len)
+        文本 ＝ UTF8到文本 (数据)
+        客户 ＝ dwConnID
         
-        调用子程序 (WS消息, , , 客户, 文本)
-        
-        .判断开始 (data.从JSON载入 (数据, #文本编码格式_UTF8, , ))
+        .判断开始 (data.解析 (文本, #YYJSON_READ_ANSI))
+            调用子程序 (WS消息, , , 客户, 文本)
             
-            .判断开始 (data.取文本 (“//post_type”) ＝ “meta_event”)
+            .判断开始 (data.取文本 (, “post_type”) ＝ “meta_event”)
                 返回 ()
                 
-            .判断 (data.取文本 (“//post_type”) ＝ “message”)
+            .判断 (data.取文本 (, “post_type”) ＝ “message”)
                 
-                .判断开始 (data.取文本 (“//message_type”) ＝ “private”)
-                    调用子程序 (私聊消息, , , 客户, data.取文本 (“//message”), data.取文本 (“//message_id”), data.取文本 (“//sender.nickname”), data.取文本 (“//sender.user_id”), data.取文本 (“//sub_type”), data.取文本 (“//self_id”))
+                .判断开始 (data.取文本 (, “message_type”) ＝ “private”)
+                    调用子程序 (私聊消息, , , 客户, data.取文本 (, “message”), 到文本 (data.取整数 (, “message_id”)), data.通配_取文本 (, “/sender/nickname”), 到文本 (data.通配_取长整数 (, “/sender/user_id”)), data.取文本 (, “sub_type”))
                     返回 ()
                     
-                .判断 (data.取文本 (“//message_type”) ＝ “group”)
-                    调用子程序 (群聊消息, , , 客户, data.取文本 (“//group_id”), data.取文本 (“//message”), data.取文本 (“//message_id”), data.取文本 (“//sender.card”), data.取文本 (“//sender.nickname”), data.取文本 (“//sender.role”), data.取文本 (“//sender.user_id”), data.取文本 (“//sub_type”), data.取文本 (“//self_id”))
+                .判断 (data.取文本 (, “message_type”) ＝ “group”)
+                    调用子程序 (群聊消息, , , 客户, 到文本 (data.取长整数 (, “group_id”)), data.取文本 (, “message”), 到文本 (data.取长整数 (, “message_id”)), data.通配_取文本 (, “/sender/card”), data.通配_取文本 (, “/sender/nickname”), data.通配_取文本 (, “/sender/role”), 到文本 (data.通配_取长整数 (, “/sender/user_id”)), data.取文本 (, “sub_type”))
                     返回 ()
                 .默认
                     
                 .判断结束
                 
-            .判断 (data.取文本 (“//post_type”) ＝ “notice”)
+            .判断 (data.取文本 (, “post_type”) ＝ “notice”)
                 
-                .判断开始 (data.取文本 (“//notice_type”) ＝ “group_upload”)
-                    调用子程序 (通知消息, , , 客户, data.取文本 (“//notice_type”), data.取文本 (“//file.name”), data.取文本 (“//file.size”), “”, data.取文本 (“//group_id”), data.取文本 (“//user_id”), “”, “”, “”, “”, data.取文本 (“//self_id”))
+                .判断开始 (data.取文本 (, “notice_type”) ＝ “group_upload”)
+                    调用子程序 (通知消息, , , 客户, data.取文本 (, “notice_type”), data.通配_取文本 (, “/file/name”), 到文本 (data.通配_取长整数 (, “/file/size”)), data.通配_取文本 (, “/file/url”), 到文本 (data.取长整数 (, “group_id”)), 到文本 (data.取长整数 (, “user_id”)), “”, “”, “”, “”)
                     返回 ()
                     
-                .判断 (data.取文本 (“//notice_type”) ＝ “group_admin”)
-                    调用子程序 (通知消息, , , 客户, data.取文本 (“//notice_type”), “”, “”, “”, data.取文本 (“//group_id”), data.取文本 (“//user_id”), data.取文本 (“//sub_type”), “”, “”, “”, data.取文本 (“//self_id”))
+                .判断 (data.取文本 (, “notice_type”) ＝ “group_admin”)
+                    调用子程序 (通知消息, , , 客户, data.取文本 (, “notice_type”), “”, “”, “”, 到文本 (data.取长整数 (, “group_id”)), 到文本 (data.取长整数 (, “user_id”)), data.取文本 (, “sub_type”), “”, “”, “”)
                     返回 ()
                     
-                .判断 (data.取文本 (“//notice_type”) ＝ “group_decrease”)
-                    调用子程序 (通知消息, , , 客户, data.取文本 (“//notice_type”), “”, “”, “”, data.取文本 (“//group_id”), data.取文本 (“//user_id”), data.取文本 (“//sub_type”), data.取文本 (“//operator_id”), “”, “”, data.取文本 (“//self_id”))
+                .判断 (data.取文本 (, “notice_type”) ＝ “group_decrease”)
+                    调用子程序 (通知消息, , , 客户, data.取文本 (, “notice_type”), “”, “”, “”, 到文本 (data.取长整数 (, “group_id”)), 到文本 (data.取长整数 (, “user_id”)), data.取文本 (, “sub_type”), 到文本 (data.取长整数 (, “operator_id”)), “”, “”)
                     返回 ()
                     
-                .判断 (data.取文本 (“//notice_type”) ＝ “group_increase”)
-                    调用子程序 (通知消息, , , 客户, data.取文本 (“//notice_type”), “”, “”, “”, data.取文本 (“//group_id”), data.取文本 (“//user_id”), data.取文本 (“//sub_type”), data.取文本 (“//operator_id”), “”, “”, data.取文本 (“//self_id”))
+                .判断 (data.取文本 (, “notice_type”) ＝ “group_increase”)
+                    调用子程序 (通知消息, , , 客户, data.取文本 (, “notice_type”), “”, “”, “”, 到文本 (data.取长整数 (, “group_id”)), 到文本 (data.取长整数 (, “user_id”)), data.取文本 (, “sub_type”), 到文本 (data.取长整数 (, “operator_id”)), “”, “”)
                     返回 ()
                     
-                .判断 (data.取文本 (“//notice_type”) ＝ “group_ban”)
-                    调用子程序 (通知消息, , , 客户, data.取文本 (“//notice_type”), “”, “”, “”, data.取文本 (“//group_id”), data.取文本 (“//user_id”), data.取文本 (“//sub_type”), data.取文本 (“//operator_id”), data.取文本 (“//duration”), “”, data.取文本 (“//self_id”))
+                .判断 (data.取文本 (, “notice_type”) ＝ “group_ban”)
+                    调用子程序 (通知消息, , , 客户, data.取文本 (, “notice_type”), “”, “”, “”, 到文本 (data.取长整数 (, “group_id”)), 到文本 (data.取长整数 (, “user_id”)), data.取文本 (, “sub_type”), 到文本 (data.取长整数 (, “operator_id”)), 到文本 (data.取长整数 (, “duration”)), “”)
                     返回 ()
                     
-                .判断 (data.取文本 (“//notice_type”) ＝ “friend_add”)
-                    调用子程序 (通知消息, , , 客户, data.取文本 (“//notice_type”), “”, “”, “”, “”, data.取文本 (“//user_id”), “”, “”, “”, “”, data.取文本 (“//self_id”))
+                .判断 (data.取文本 (, “notice_type”) ＝ “friend_add”)
+                    调用子程序 (通知消息, , , 客户, data.取文本 (, “notice_type”), “”, “”, “”, “”, 到文本 (data.取长整数 (, “user_id”)), “”, “”, “”, “”)
                     返回 ()
                     
-                .判断 (data.取文本 (“//notice_type”) ＝ “group_recall”)
-                    调用子程序 (通知消息, , , 客户, data.取文本 (“//notice_type”), “”, “”, “”, data.取文本 (“//group_id”), data.取文本 (“//user_id”), “”, data.取文本 (“//operator_id”), “”, data.取文本 (“//message_id”), data.取文本 (“//self_id”))
+                .判断 (data.取文本 (, “notice_type”) ＝ “group_recall”)
+                    调用子程序 (通知消息, , , 客户, data.取文本 (, “notice_type”), “”, “”, “”, 到文本 (data.取长整数 (, “group_id”)), 到文本 (data.取长整数 (, “user_id”)), “”, 到文本 (data.取长整数 (, “operator_id”)), “”, 到文本 (data.取长整数 (, “message_id”)))
                     返回 ()
                     
-                .判断 (data.取文本 (“//notice_type”) ＝ “friend_recall”)
-                    调用子程序 (通知消息, , , 客户, data.取文本 (“//notice_type”), “”, “”, “”, “”, data.取文本 (“//user_id”), “”, “”, “”, data.取文本 (“//message_id”), data.取文本 (“//self_id”))
+                .判断 (data.取文本 (, “notice_type”) ＝ “friend_recall”)
+                    调用子程序 (通知消息, , , 客户, data.取文本 (, “notice_type”), “”, “”, “”, “”, 到文本 (data.取长整数 (, “user_id”)), “”, “”, “”, 到文本 (data.取长整数 (, “message_id”)))
                     返回 ()
                     
-                .判断 (data.取文本 (“//notice_type”) ＝ “offline_file”)
-                    调用子程序 (通知消息, , , 客户, data.取文本 (“//notice_type”), data.取文本 (“//file.name”), data.取文本 (“//file.size”), data.取文本 (“//file.url”), data.取文本 (“//user_id”), “”, “”, “”, “”, data.取文本 (“//self_id”))
+                .判断 (data.取文本 (, “notice_type”) ＝ “offline_file”)
+                    调用子程序 (通知消息, , , 客户, data.取文本 (, “notice_type”), data.通配_取文本 (, “/file/name”), 到文本 (data.通配_取长整数 (, “/file/size”)), data.通配_取文本 (, “/file/url”), 到文本 (data.取长整数 (, “user_id”)), “”, “”, “”, “”)
                     返回 ()
                     
                 .默认
                     
                 .判断结束
                 
-            .判断 (data.取文本 (“//post_type”) ＝ “request”)
+            .判断 (data.取文本 (, “post_type”) ＝ “request”)
                 
-                .判断开始 (data.取文本 (“//request_type”) ＝ “friend”)
-                    调用子程序 (请求消息, , , 客户, data.取文本 (“//request_type”), “”, “”, data.取文本 (“//user_id”), data.取文本 (“//comment”), data.取文本 (“//flag”), data.取文本 (“//self_id”))
+                .判断开始 (data.取文本 (, “request_type”) ＝ “friend”)
+                    调用子程序 (请求消息, , , 客户, data.取文本 (, “request_type”), “”, “”, 到文本 (data.取长整数 (, “user_id”)), data.取文本 (, “comment”), data.取文本 (, “flag”))
                     返回 ()
                     
-                .判断 (data.取文本 (“//request_type”) ＝ “group”)
-                    调用子程序 (请求消息, , , 客户, data.取文本 (“//request_type”), data.取文本 (“//sub_type”), data.取文本 (“//group_id”), data.取文本 (“//user_id”), data.取文本 (“//comment”), data.取文本 (“//flag”), data.取文本 (“//self_id”))
+                .判断 (data.取文本 (, “request_type”) ＝ “group”)
+                    调用子程序 (请求消息, , , 客户, data.取文本 (, “request_type”), data.取文本 (, “sub_type”), 到文本 (data.取长整数 (, “group_id”)), 到文本 (data.取长整数 (, “user_id”)), data.取文本 (, “comment”), data.取文本 (, “flag”))
                     返回 ()
+                    
                 .默认
                     
                 .判断结束
@@ -119,35 +114,24 @@
     .如果真结束
     
 
-.子程序 WS客户进入事件
-    .参数 客户句柄, 整数型
-    .局部变量 客户, 整数型
+.子程序 WS客户进入
+    .参数 Server, 整数型
+    .参数 dwConnID, 整数型
 
-    客户 ＝ 客户句柄
-    调用子程序 (WS消息, , , 客户, “客户端进入”)
+    调用子程序 (WS消息, , , dwConnID, “客户端进入”)
     
 
-.子程序 WS客户退出事件
-    .参数 客户句柄, 整数型
-    .局部变量 客户, 整数型
+.子程序 WS客户退出
+    .参数 Server, 整数型
+    .参数 dwConnID, 整数型
+    .参数 enOperation, 整数型
+    .参数 iErrorCode, 整数型
 
-    调用子程序 (WS消息, , , 客户, “客户端退出”)
-    
-
-.子程序 json实体处理, 文本型
-    .参数 文本, 文本型
-    .局部变量 tmp, 文本型
-
-    tmp ＝ 子文本替换 (文本, #换行符, “”, 1, , 真)
-    tmp ＝ 子文本替换 (tmp, “&”, 编码_Ansi到Unicode_文本型 (“&”) ＋ “;”, 1, , 真)
-    tmp ＝ 子文本替换 (tmp, “,”, 编码_Ansi到Unicode_文本型 (“,”) ＋ “;”, 1, , 真)
-    tmp ＝ 子文本替换 (tmp, “[”, 编码_Ansi到Unicode_文本型 (“[”) ＋ “;”, 1, , 真)
-    tmp ＝ 子文本替换 (tmp, “]”, 编码_Ansi到Unicode_文本型 (“]”) ＋ “;”, 1, , 真)
-    返回 (tmp)
+    调用子程序 (WS消息, , , dwConnID, “客户端退出”)
     
 
 .子程序 _private, , 公开, 私聊消息,示例代码
-    .参数 客户句柄, 整数型
+    .参数 dwConnID, 整数型, , 客户句柄
     .参数 message, 文本型, , 消息内容
     .参数 message_id, 文本型, , 消息 ID
     .参数 nickname, 文本型, , 昵称
@@ -158,7 +142,7 @@
     
 
 .子程序 _group, , 公开, 群消息,示例代码
-    .参数 客户句柄, 整数型
+    .参数 dwConnID, 整数型, , 客户句柄
     .参数 group_id, 文本型, , 群号
     .参数 message, 文本型, , 消息内容
     .参数 message_id, 文本型, , 消息 ID
@@ -172,7 +156,7 @@
     
 
 .子程序 _notice, , 公开, 通知事件,示例代码
-    .参数 客户句柄, 整数型
+    .参数 dwConnID, 整数型, , 客户句柄
     .参数 notice_type, 文本型, , 通知类型
     .参数 name, 文本型, , 文件名
     .参数 size, 文本型, , 文件大小（字节数）
@@ -188,7 +172,7 @@
     
 
 .子程序 _request, , 公开, 请求事件,示例代码
-    .参数 客户句柄, 整数型
+    .参数 dwConnID, 整数型, , 客户句柄
     .参数 request_type, 文本型, , 请求类型
     .参数 sub_type, 文本型, , 请求子类型
     .参数 group_id, 文本型, , 群号
@@ -200,7 +184,7 @@
     
 
 .子程序 _ws, , 公开, ws客户端消息,示例代码
-    .参数 客户句柄, 整数型
+    .参数 dwConnID, 整数型, , 客户句柄
     .参数 msg, 文本型
 
     

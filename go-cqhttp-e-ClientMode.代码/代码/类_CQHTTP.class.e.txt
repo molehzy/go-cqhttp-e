@@ -1,5 +1,4 @@
 ﻿.版本 2
-.支持库 e2ee
 
 .程序集 类_CQHTTP, , 公开
 .程序集变量 协议头, 文本型
@@ -11,83 +10,150 @@
     断开 ()
     
 
-.子程序 初始化, , 公开, 必须在代码开头执行且仅执行一次
+.子程序 初始化, 逻辑型, 公开, 必须在代码开头执行且仅执行一次
+    .参数 WS地址, 文本型, , 示例：ws://127.0.0.1:6700
+    .参数 Token, 文本型, 可空
     .参数 私聊消息回传, 子程序指针, , 见程序"_private"
     .参数 群聊消息回传, 子程序指针, , 见程序"_group"
     .参数 通知消息回传, 子程序指针, , 见程序"_notice"
     .参数 请求消息回传, 子程序指针, , 见程序"_request"
     .参数 WS消息回传, 子程序指针, , 见程序"_ws"
+    .局部变量 hd, TNVPair, , "1"
 
-    私聊消息 ＝ 私聊消息回传
-    群聊消息 ＝ 群聊消息回传
-    通知消息 ＝ 通知消息回传
-    请求消息 ＝ 请求消息回传
-    WS消息 ＝ WS消息回传
-    WS初始化 ()
+    .如果真 (pClient ＝ 0)
+        pClient ＝ WSC创建 (WS地址)
+        
+        .如果真 (pClient ≠ 0)
+            .如果真 (取反 (是否为空 (Token)))
+                hd [1].name ＝ “Authorization”
+                hd [1].value ＝ “Bearer ” ＋ Token
+                WSC置请求头 (pClient, hd)
+                协议头 ＝ 文本替换 (#协议头, 23, 1, Token)
+            .如果真结束
+            
+            私聊消息 ＝ 私聊消息回传
+            群聊消息 ＝ 群聊消息回传
+            通知消息 ＝ 通知消息回传
+            请求消息 ＝ 请求消息回传
+            WS消息 ＝ WS消息回传
+            WSC绑定事件 (&WS收到消息, &WS连接成功, &WS断开连接)
+            返回 (真)
+            
+        .如果真结束
+        返回 (假)
+    .如果真结束
+    返回 (假)
     
 
 .子程序 连接, 逻辑型, 公开, 此方法为阻塞模式,连接成功返回真
-    .参数 WS地址, 文本型, , 示例：127.0.0.1:6700
-    .参数 Token, 文本型, 可空
-    .局部变量 请求头, 存取键值表
-
-    .如果真 (取反 (是否为空 (Token)))
-        请求头.创建 (“Authorization”, “Bearer ” ＋ Token)
-        WS.置请求头 (请求头)
-        协议头 ＝ 文本替换 (#协议头, 23, 1, Token)
-    .如果真结束
-    
-    返回 (WS.连接 (“ws://” ＋ WS地址, 真, ))
+    返回 (WSC连接 (pClient, 假))
     
 
-.子程序 断开, , 公开
-    WS.断开 ()
+.子程序 断开, 逻辑型, 公开
+    返回 (WSC断开 (pClient))
     
 
 .子程序 发送私聊消息, , 公开
     .参数 user_id, 文本型, , 对方 QQ 号
     .参数 message, 文本型, , 要发送的内容
     .参数 auto_escape, 逻辑型, , 消息内容是否作为纯文本发送（即不解析 CQ 码），只在 message 字段是字符串时有效
-    .局部变量 data, 存取键值表
-    .局部变量 tmp, 存取键值表
+    .局部变量 data, yyJSON构造
+    .局部变量 tmp, yyJSON构造
 
-    tmp.创建 (“user_id”, 到长整数 (user_id), “message”, message, “auto_escape”, auto_escape)
-    data.创建 (“action”, “send_private_msg”, “params”, tmp)
-    WS.发送文本 (data.到JSON (假, , ))
+    tmp.创建_空对象 ()
+    tmp.置长整数 (, “user_id”, 到长整数 (user_id))
+    tmp.置文本 (, “message”, message)
+    tmp.置逻辑 (, “auto_escape”, auto_escape)
+    data.创建_空对象 ()
+    data.置文本 (, “action”, “send_private_msg”)
+    data.置JSON (, “params”, tmp.到JSON (#YYJSON_WRITE_ANSI))
+    WSC发送消息 (pClient, 1, 文本到UTF8 (data.到JSON (#YYJSON_WRITE_ANSI)))
     
 
 .子程序 发送群消息, , 公开
     .参数 group_id, 文本型, , 群号
     .参数 message, 文本型, , 要发送的内容
     .参数 auto_escape, 逻辑型, , 消息内容是否作为纯文本发送（即不解析 CQ 码），只在 message 字段是字符串时有效
-    .局部变量 data, 存取键值表
-    .局部变量 tmp, 存取键值表
+    .局部变量 data, yyJSON构造
+    .局部变量 tmp, yyJSON构造
 
-    tmp.创建 (“group_id”, 到长整数 (group_id), “message”, message, “auto_escape”, auto_escape)
-    data.创建 (“action”, “send_group_msg”, “params”, tmp)
-    WS.发送文本 (data.到JSON (假, , ))
+    tmp.创建_空对象 ()
+    tmp.置长整数 (, “group_id”, 到长整数 (group_id))
+    tmp.置文本 (, “message”, message)
+    tmp.置逻辑 (, “auto_escape”, auto_escape)
+    data.创建_空对象 ()
+    data.置文本 (, “action”, “send_group_msg”)
+    data.置JSON (, “params”, tmp.到JSON (#YYJSON_WRITE_ANSI))
+    WSC发送消息 (pClient, 1, 文本到UTF8 (data.到JSON (#YYJSON_WRITE_ANSI)))
+    
+
+.子程序 发送合并转发_群, , 公开
+    .参数 group_id, 文本型
+    .参数 messages, 数_node, 数组
+    .局部变量 data, yyJSON构造
+    .局部变量 tmp, yyJSON构造
+    .局部变量 tmp2, yyJSON构造
+    .局部变量 list, yyJSON构造
+    .局部变量 i, 整数型
+
+    tmp.创建_空对象 ()
+    tmp2.创建_空对象 ()
+    list.创建_空数组 ()
+    .计次循环首 (取数组成员数 (messages), i)
+        .判断开始 (messages [i].id ＝ “”)
+            tmp.置文本 (, “name”, messages [i].name)
+            tmp.置文本 (, “uin”, messages [i].uin)
+            tmp.置文本 (, “content”, messages [i].content)
+            tmp.置文本 (, “seq”, messages [i].seq)
+            tmp2.置文本 (, “type”, “node”)
+            tmp2.置JSON (, “data”, tmp.到JSON (#YYJSON_WRITE_ANSI))
+            
+        .默认
+            tmp.置文本 (, “id”, messages [i].id)
+            tmp2.置文本 (, “type”, “node”)
+            tmp2.置JSON (, “data”, tmp.到JSON (#YYJSON_WRITE_ANSI))
+            
+        .判断结束
+        list.数组_置JSON (, #YJ_数组_加入, tmp2.到JSON (#YYJSON_WRITE_ANSI))
+        tmp.清空 ()
+        tmp2.清空 ()
+    .计次循环尾 ()
+    tmp.置长整数 (, “group_id”, 到长整数 (group_id))
+    tmp.置JSON (, “messages”, list.到JSON (#YYJSON_WRITE_ANSI))
+    data.创建_空对象 ()
+    data.置文本 (, “action”, “send_group_forward_msg”)
+    data.置JSON (, “params”, tmp.到JSON (#YYJSON_WRITE_ANSI))
+    WSC发送消息 (pClient, 1, 文本到UTF8 (data.到JSON (#YYJSON_WRITE_ANSI)))
     
 
 .子程序 撤回消息, , 公开
     .参数 message_id, 文本型, , 消息 ID
-    .局部变量 data, 存取键值表
-    .局部变量 tmp, 存取键值表
+    .局部变量 data, yyJSON构造
+    .局部变量 tmp, yyJSON构造
 
-    tmp.创建 (“message_id”, 到长整数 (message_id))
-    data.创建 (“action”, “delete_msg”, “params”, tmp)
-    WS.发送文本 (data.到JSON (假, , ))
+    tmp.创建_空对象 ()
+    tmp.置长整数 (, “message_id”, 到长整数 (message_id))
+    data.创建_空对象 ()
+    data.置文本 (, “action”, “delete_msg”)
+    data.置JSON (, “params”, tmp.到JSON (#YYJSON_WRITE_ANSI))
+    WSC发送消息 (pClient, 1, 文本到UTF8 (data.到JSON (#YYJSON_WRITE_ANSI)))
     
 
 .子程序 处理加好友请求, , 公开
     .参数 flag, 文本型, , 加好友请求的 flag（需从上报的数据中获得）
     .参数 approve, 逻辑型, , 是否同意请求
     .参数 remark, 文本型, , 添加后的好友备注（仅在同意时有效）
-    .局部变量 data, 存取键值表
-    .局部变量 tmp, 存取键值表
+    .局部变量 data, yyJSON构造
+    .局部变量 tmp, yyJSON构造
 
-    tmp.创建 (“flag”, flag, “approve”, approve, “remark”, remark)
-    data.创建 (“action”, “set_friend_add_request”, “params”, tmp)
-    WS.发送文本 (data.到JSON (假, , ))
+    tmp.创建_空对象 ()
+    tmp.置文本 (, “flag”, flag)
+    tmp.置逻辑 (, “approve”, approve)
+    tmp.置文本 (, “remark”, remark)
+    data.创建_空对象 ()
+    data.置文本 (, “action”, “set_friend_add_request”)
+    data.置JSON (, “params”, tmp.到JSON (#YYJSON_WRITE_ANSI))
+    WSC发送消息 (pClient, 1, 文本到UTF8 (data.到JSON (#YYJSON_WRITE_ANSI)))
     
 
 .子程序 处理加群请求, , 公开
@@ -95,94 +161,123 @@
     .参数 sub_type, 文本型, , add 或 invite，请求类型（需要和上报消息中的 sub_type 字段相符）
     .参数 approve, 逻辑型, , 是否同意请求／邀请
     .参数 reason, 文本型, , 拒绝理由（仅在拒绝时有效）
-    .局部变量 data, 存取键值表
-    .局部变量 tmp, 存取键值表
+    .局部变量 data, yyJSON构造
+    .局部变量 tmp, yyJSON构造
 
-    tmp.创建 (“flag”, flag, “sub_type”, sub_type, “approve”, approve, “reason”, reason)
-    data.创建 (“action”, “set_group_add_request”, “params”, tmp)
-    WS.发送文本 (data.到JSON (假, , ))
+    tmp.创建_空对象 ()
+    tmp.置文本 (, “flag”, flag)
+    tmp.置文本 (, “sub_type”, sub_type)
+    tmp.置逻辑 (, “approve”, approve)
+    tmp.置文本 (, “reason”, reason)
+    data.创建_空对象 ()
+    data.置文本 (, “action”, “set_group_add_request”)
+    data.置JSON (, “params”, tmp.到JSON (#YYJSON_WRITE_ANSI))
+    WSC发送消息 (pClient, 1, 文本到UTF8 (data.到JSON (#YYJSON_WRITE_ANSI)))
     
 
 .子程序 设置群名片, , 公开
     .参数 group_id, 文本型, , 群号
     .参数 user_id, 文本型, , 要设置的 QQ 号
     .参数 card, 文本型, , 群名片内容，空字符串表示删除群名片
-    .局部变量 data, 存取键值表
-    .局部变量 tmp, 存取键值表
+    .局部变量 data, yyJSON构造
+    .局部变量 tmp, yyJSON构造
 
-    tmp.创建 (“group_id”, 到长整数 (group_id), “user_id”, 到长整数 (user_id), “card”, card)
-    data.创建 (“action”, “set_group_card”, “params”, tmp)
-    WS.发送文本 (data.到JSON (假, , ))
+    tmp.创建_空对象 ()
+    tmp.置长整数 (, “group_id”, 到长整数 (group_id))
+    tmp.置长整数 (, “user_id”, 到长整数 (user_id))
+    tmp.置文本 (, “card”, card)
+    data.创建_空对象 ()
+    data.置文本 (, “action”, “set_group_card”)
+    data.置JSON (, “params”, tmp.到JSON (#YYJSON_WRITE_ANSI))
+    WSC发送消息 (pClient, 1, 文本到UTF8 (data.到JSON (#YYJSON_WRITE_ANSI)))
     
 
 .子程序 群组踢人, , 公开
     .参数 group_id, 文本型, , 群号
     .参数 user_id, 文本型, , 要踢的 QQ 号
     .参数 reject_add_request, 逻辑型, , 拒绝此人的加群请求
-    .局部变量 data, 存取键值表
-    .局部变量 tmp, 存取键值表
+    .局部变量 data, yyJSON构造
+    .局部变量 tmp, yyJSON构造
 
-    tmp.创建 (“group_id”, 到长整数 (group_id), “user_id”, 到长整数 (user_id), “reject_add_request”, reject_add_request)
-    data.创建 (“action”, “set_group_kick”, “params”, tmp)
-    WS.发送文本 (data.到JSON (假, , ))
+    tmp.创建_空对象 ()
+    tmp.置长整数 (, “group_id”, 到长整数 (group_id))
+    tmp.置长整数 (, “user_id”, 到长整数 (user_id))
+    tmp.置逻辑 (, “reject_add_request”, reject_add_request)
+    data.创建_空对象 ()
+    data.置文本 (, “action”, “set_group_kick”)
+    data.置JSON (, “params”, tmp.到JSON (#YYJSON_WRITE_ANSI))
+    WSC发送消息 (pClient, 1, 文本到UTF8 (data.到JSON (#YYJSON_WRITE_ANSI)))
     
 
 .子程序 群组单人禁言, , 公开
     .参数 group_id, 文本型, , 群号
     .参数 user_id, 文本型, , 要禁言的 QQ 号
     .参数 duration, 整数型, , 禁言时长，单位秒，0 表示取消禁言
-    .局部变量 data, 存取键值表
-    .局部变量 tmp, 存取键值表
+    .局部变量 data, yyJSON构造
+    .局部变量 tmp, yyJSON构造
 
-    tmp.创建 (“group_id”, 到长整数 (group_id), “user_id”, 到长整数 (user_id), “duration”, duration)
-    data.创建 (“action”, “set_group_kick”, “params”, tmp)
-    WS.发送文本 (data.到JSON (假, , ))
+    tmp.创建_空对象 ()
+    tmp.置长整数 (, “group_id”, 到长整数 (group_id))
+    tmp.置长整数 (, “user_id”, 到长整数 (user_id))
+    tmp.置整数 (, “duration”, duration)
+    data.创建_空对象 ()
+    data.置文本 (, “action”, “set_group_ban”)
+    data.置JSON (, “params”, tmp.到JSON (#YYJSON_WRITE_ANSI))
+    WSC发送消息 (pClient, 1, 文本到UTF8 (data.到JSON (#YYJSON_WRITE_ANSI)))
     
 
 .子程序 群组全员禁言, , 公开
     .参数 group_id, 文本型, , 群号
     .参数 enable, 逻辑型, , 是否禁言
-    .局部变量 data, 存取键值表
-    .局部变量 tmp, 存取键值表
+    .局部变量 data, yyJSON构造
+    .局部变量 tmp, yyJSON构造
 
-    tmp.创建 (“group_id”, 到长整数 (group_id), “enable”, enable)
-    data.创建 (“action”, “set_group_kick”, “params”, tmp)
-    WS.发送文本 (data.到JSON (假, , ))
+    tmp.创建_空对象 ()
+    tmp.置长整数 (, “group_id”, 到长整数 (group_id))
+    tmp.置逻辑 (, “enable”, enable)
+    data.创建_空对象 ()
+    data.置文本 (, “action”, “set_group_whole_ban”)
+    data.置JSON (, “params”, tmp.到JSON (#YYJSON_WRITE_ANSI))
+    WSC发送消息 (pClient, 1, 文本到UTF8 (data.到JSON (#YYJSON_WRITE_ANSI)))
     
 
 .子程序 退出群组, , 公开
     .参数 group_id, 文本型, , 群号
-    .参数 is_dismiss, 文本型, , 是否解散，如果登录号是群主，则仅在此项为 真 时能够解散
-    .局部变量 data, 存取键值表
-    .局部变量 tmp, 存取键值表
+    .参数 is_dismiss, 逻辑型, , 是否解散，如果登录号是群主，则仅在此项为 真 时能够解散
+    .局部变量 data, yyJSON构造
+    .局部变量 tmp, yyJSON构造
 
-    tmp.创建 (“group_id”, 到长整数 (group_id), “is_dismiss”, is_dismiss)
-    data.创建 (“action”, “set_group_kick”, “params”, tmp)
-    WS.发送文本 (data.到JSON (假, , ))
+    tmp.创建_空对象 ()
+    tmp.置长整数 (, “group_id”, 到长整数 (group_id))
+    tmp.置逻辑 (, “is_dismiss”, is_dismiss)
+    data.创建_空对象 ()
+    data.置文本 (, “action”, “set_group_leave”)
+    data.置JSON (, “params”, tmp.到JSON (#YYJSON_WRITE_ANSI))
+    WSC发送消息 (pClient, 1, 文本到UTF8 (data.到JSON (#YYJSON_WRITE_ANSI)))
     
 
 .子程序 HTTP获取好友列表, 文本型, 公开
     .参数 HTTP地址, 文本型, , 示例：127.0.0.1:5700
     .参数 好友列表, 数_好友, 参考 数组, 请提供一个变量用于存放数据
     .局部变量 tmp, 文本型
-    .局部变量 data, 存取键值表
+    .局部变量 data, yyJSON解析
     .局部变量 计次, 整数型
     .局部变量 临时列表, 数_好友
     .局部变量 临时列表2, 数_好友, , "0"
 
     tmp ＝ 编码_Utf8到Ansi (网页_访问_对象 (“http://” ＋ HTTP地址 ＋ “/get_friend_list”, 0, , , , 协议头))
-    data.从JSON载入 (tmp, , )
-    .判断开始 (data.取文本 (“//status”) ＝ “ok”)
-        .计次循环首 (data.取数量 (“//data”), 计次)
-            临时列表.user_id ＝ data.取文本 (“//data[” ＋ 到文本 (计次) ＋ “].user_id”)
-            临时列表.nickname ＝ data.取文本 (“//data[” ＋ 到文本 (计次) ＋ “].nickname”)
-            临时列表.remark ＝ data.取文本 (“//data[” ＋ 到文本 (计次) ＋ “].remark”)
+    data.解析 (tmp, #YYJSON_READ_ANSI)
+    .判断开始 (data.取文本 (, “status”) ＝ “ok”)
+        .计次循环首 (data.取成员数 (, “data”), 计次)
+            临时列表.user_id ＝ data.通配_取文本 (, “/data/” ＋ 到文本 (计次) ＋ “/user_id”)
+            临时列表.nickname ＝ data.通配_取文本 (, “/data/” ＋ 到文本 (计次) ＋ “/nickname”)
+            临时列表.remark ＝ data.通配_取文本 (, “/data/” ＋ 到文本 (计次) ＋ “/remark”)
             加入成员 (临时列表2, 临时列表)
         .计次循环尾 ()
         好友列表 ＝ 临时列表2
         返回 (“ok”)
     .默认
-        返回 (data.取文本 (“//status”))
+        返回 (data.取文本 (, “status”))
     .判断结束
     
 
@@ -190,25 +285,25 @@
     .参数 HTTP地址, 文本型, , 示例：127.0.0.1:5700
     .参数 群列表, 数_群, 参考 数组, 请提供一个变量用于存放数据
     .局部变量 tmp, 文本型
-    .局部变量 data, 存取键值表
+    .局部变量 data, yyJSON解析
     .局部变量 计次, 整数型
     .局部变量 临时列表, 数_群
     .局部变量 临时列表2, 数_群, , "0"
 
     tmp ＝ 编码_Utf8到Ansi (网页_访问_对象 (“http://” ＋ HTTP地址 ＋ “/get_group_list”, 0, , , , 协议头))
-    data.从JSON载入 (tmp, , )
-    .判断开始 (data.取文本 (“//status”) ＝ “ok”)
-        .计次循环首 (data.取数量 (“//data”), 计次)
-            临时列表.group_id ＝ data.取文本 (“//data[” ＋ 到文本 (计次) ＋ “].group_id”)
-            临时列表.group_name ＝ data.取文本 (“//data[” ＋ 到文本 (计次) ＋ “].group_name”)
-            临时列表.member_count ＝ data.取文本 (“//data[” ＋ 到文本 (计次) ＋ “].member_count”)
-            临时列表.max_member_count ＝ data.取文本 (“//data[” ＋ 到文本 (计次) ＋ “].max_member_count”)
+    data.解析 (tmp, #YYJSON_READ_ANSI)
+    .判断开始 (data.取文本 (, “status”) ＝ “ok”)
+        .计次循环首 (data.取成员数 (, “data”), 计次)
+            临时列表.group_id ＝ data.通配_取文本 (, “/data/” ＋ 到文本 (计次) ＋ “/group_id”)
+            临时列表.group_name ＝ data.通配_取文本 (, “/data/” ＋ 到文本 (计次) ＋ “/group_name”)
+            临时列表.member_count ＝ data.通配_取文本 (, “/data/” ＋ 到文本 (计次) ＋ “/member_count”)
+            临时列表.max_member_count ＝ data.通配_取文本 (, “/data/” ＋ 到文本 (计次) ＋ “/max_member_count”)
             加入成员 (临时列表2, 临时列表)
         .计次循环尾 ()
         群列表 ＝ 临时列表2
         返回 (“ok”)
     .默认
-        返回 (data.取文本 (“//status”))
+        返回 (data.取文本 (, “status”))
     .判断结束
     
 
@@ -217,14 +312,18 @@
     .参数 user_id, 文本型, , 对方 QQ 号
     .参数 message, 文本型, , 要发送的内容
     .参数 auto_escape, 逻辑型, , 消息内容是否作为纯文本发送（即不解析 CQ 码），只在 message 字段是字符串时有效
-    .局部变量 data, 存取键值表
-    .局部变量 tmp, 文本型
+    .局部变量 data, yyJSON构造
+    .局部变量 res, 文本型
+    .局部变量 tmp, yyJSON解析
 
-    data.创建 (“user_id”, 到长整数 (user_id), “message”, message, “auto_escape”, auto_escape)
-    tmp ＝ 编码_Utf8到Ansi (网页_访问_对象 (“http://” ＋ HTTP地址 ＋ “/send_private_msg”, 1, data.到JSON (假, , , , ), , , 协议头))
-    data.从JSON载入 (tmp, , )
-    .判断开始 (data.取文本 (“//status”) ＝ “ok”)
-        返回 (data.取文本 (“//data.message_id”))
+    data.创建_空对象 ()
+    data.置长整数 (, “user_id”, 到长整数 (user_id))
+    data.置文本 (, “message”, message)
+    data.置逻辑 (, “auto_escape”, auto_escape)
+    res ＝ 编码_Utf8到Ansi (网页_访问_对象 (“http://” ＋ HTTP地址 ＋ “/send_private_msg”, 1, data.到JSON (#YYJSON_WRITE_ANSI), , , 协议头))
+    tmp.解析 (res, #YYJSON_READ_ANSI)
+    .判断开始 (data.取文本 (, “status”) ＝ “ok”)
+        返回 (data.通配_取文本 (, “/data/message_id”))
     .默认
         返回 (“failed”)
     .判断结束
@@ -235,78 +334,21 @@
     .参数 group_id, 文本型, , 群号
     .参数 message, 文本型, , 要发送的内容
     .参数 auto_escape, 逻辑型, , 消息内容是否作为纯文本发送（即不解析 CQ 码），只在 message 字段是字符串时有效
-    .局部变量 data, 存取键值表
-    .局部变量 tmp, 文本型
+    .局部变量 data, yyJSON构造
+    .局部变量 res, 文本型
+    .局部变量 tmp, yyJSON解析
 
-    data.创建 (“group_id”, 到长整数 (group_id), “message”, message, “auto_escape”, auto_escape)
-    tmp ＝ 编码_Utf8到Ansi (网页_访问_对象 (“http://” ＋ HTTP地址 ＋ “/send_group_msg”, 1, data.到JSON (假, , , , ), , , 协议头))
-    data.从JSON载入 (tmp, , )
-    .判断开始 (data.取文本 (“//status”) ＝ “ok”)
-        返回 (data.取文本 (“//data.message_id”))
+    data.创建_空对象 ()
+    data.置长整数 (, “group_id”, 到长整数 (group_id))
+    data.置文本 (, “message”, message)
+    data.置逻辑 (, “auto_escape”, auto_escape)
+    res ＝ 编码_Utf8到Ansi (网页_访问_对象 (“http://” ＋ HTTP地址 ＋ “/send_group_msg”, 1, data.到JSON (#YYJSON_WRITE_ANSI), , , 协议头))
+    tmp.解析 (res, #YYJSON_READ_ANSI)
+    .判断开始 (data.取文本 (, “status”) ＝ “ok”)
+        返回 (data.通配_取文本 (, “/data/message_id”))
     .默认
         返回 (“failed”)
     .判断结束
-    
-
-.子程序 XML生成, 文本型, 公开, 返回生成好的CQ码
-    .参数 BRIEF, 文本型
-    .参数 URL, 文本型
-    .参数 PICTURE_URL, 文本型
-    .参数 TITLE, 文本型
-    .参数 SUMMARY, 文本型
-    .参数 SOURCE_NAME, 文本型
-    .参数 SOURCE_ICON_URL, 文本型
-    .局部变量 tmp, 文本型
-
-    tmp ＝ 子文本替换 (#XML, “[BRIEF]”, HTML关键字编码 (BRIEF), 1, , 真)
-    tmp ＝ 子文本替换 (tmp, “[URL]”, HTML关键字编码 (URL), 1, , 真)
-    tmp ＝ 子文本替换 (tmp, “[PURL]”, HTML关键字编码 (PICTURE_URL), 1, , 真)
-    tmp ＝ 子文本替换 (tmp, “[TITLE]”, HTML关键字编码 (TITLE), 1, , 真)
-    tmp ＝ 子文本替换 (tmp, “[SUM]”, HTML关键字编码 (SUMMARY), 1, , 真)
-    tmp ＝ 子文本替换 (tmp, “[SOURCENAME]”, HTML关键字编码 (SOURCE_NAME), 1, , 真)
-    tmp ＝ 子文本替换 (tmp, “[SOURCEICON]”, HTML关键字编码 (SOURCE_ICON_URL), 1, , 真)
-    返回 (“[CQ:xml,data=” ＋ tmp ＋ “]”)
-    
-
-.子程序 JSON生成, 文本型, 公开, 返回生成好的CQ码
-    .参数 prompt, 文本型
-    .参数 appName, 文本型
-    .参数 iconUrl, 文本型
-    .参数 title, 文本型
-    .参数 data启用, 逻辑型
-    .参数 data数组, 数_data, 可空 数组
-    .参数 button启用, 逻辑型
-    .参数 button数组, 数_button, 可空 数组
-    .局部变量 json, 存取键值表
-    .局部变量 meta, 存取键值表
-    .局部变量 noti, 存取键值表
-    .局部变量 appInfo, 存取键值表
-    .局部变量 data, 存取列表
-    .局部变量 data2, 存取键值表
-    .局部变量 button, 存取列表
-    .局部变量 button2, 存取键值表
-    .局部变量 i, 整数型
-
-    .如果真 (button启用)
-        .计次循环首 (取数组成员数 (button数组), i)
-            button2.创建 (“name”, button数组 [i].name, “action”, button数组 [i].action)
-            button.添加键值表 (button2)
-        .计次循环尾 ()
-    .如果真结束
-    
-    .如果真 (data启用)
-        .计次循环首 (取数组成员数 (data数组), i)
-            data2.创建 (“title”, data数组 [i].title, “value”, data数组 [i].value)
-            data.添加键值表 (data2)
-        .计次循环尾 ()
-    .如果真结束
-    
-    appInfo.创建 (“appName”, appName, “iconUrl”, iconUrl, “appType”, 4, “appid”, 1109659848)
-    noti.创建 (“title”, title, “appInfo”, appInfo, “data”, data, “button”, button, “emphasis_keyword”, “”)
-    meta.创建 (“notification”, noti)
-    json.创建 (“app”, “com.tencent.miniapp”, “desc”, “”, “view”, “notification”, “ver”, “0.0.0.1”, “prompt”, prompt, “appID”, “”, “sourceName”, “”, “actionData”, “”, “actionData_A”, “”, “sourceUrl”, “”, “meta”, meta, “text”, “”, “sourceAd”, “”)
-    
-    返回 (“[CQ:json,data=” ＋ json实体处理 (json.到JSON (假, , , , )) ＋ “]”)
     
 
 .子程序 At, 文本型, 公开, 返回生成好的CQ码
