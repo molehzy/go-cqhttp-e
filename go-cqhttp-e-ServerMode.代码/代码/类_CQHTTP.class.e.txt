@@ -1,6 +1,7 @@
 ﻿.版本 2
 
 .程序集 类_CQHTTP, , 公开
+.程序集变量 m_pServer, 整数型
 .程序集变量 协议头, 文本型
 
 .子程序 _初始化, , , 当基于本类的对象被创建后，此方法会被自动调用
@@ -8,6 +9,8 @@
 
 .子程序 _销毁, , , 当基于本类的对象被销毁前，此方法会被自动调用
     停止 ()
+    WSS销毁Server (m_pServer)
+    WSS销毁Listener ()
     
 
 .子程序 初始化, 逻辑型, 公开, 必须在代码开头执行且仅执行一次
@@ -17,10 +20,10 @@
     .参数 请求消息回传, 子程序指针, , 见程序"_request"
     .参数 WS消息回传, 子程序指针, , 见程序"_ws"
 
-    .如果真 (pServer ＝ 0)
-        pServer ＝ WSS创建 ()
+    .如果真 (m_pServer ＝ 0)
+        m_pServer ＝ WSS创建 ()
         
-        .如果真 (pServer ≠ 0)
+        .如果真 (m_pServer ≠ 0)
             私聊消息 ＝ 私聊消息回传
             群聊消息 ＝ 群聊消息回传
             通知消息 ＝ 通知消息回传
@@ -39,23 +42,23 @@
     .参数 监听, 文本型, , 示例：0.0.0.0
     .参数 端口, 整数型
 
-    返回 (WSS启动 (pServer, 监听, 端口))
+    返回 (WSS启动 (m_pServer, 监听, 端口))
     
 
 .子程序 停止, 逻辑型, 公开
-    返回 (WSS停止 (pServer))
+    返回 (WSS停止 (m_pServer))
     
 
 .子程序 _关闭客户, 逻辑型, 公开
     .参数 dwConnID, 整数型
 
-    返回 (WSS断开 (pServer, dwConnID, 真))
+    返回 (WSS断开 (m_pServer, dwConnID, 真))
     
 
 .子程序 _是否在线, 逻辑型, 公开
     .参数 dwConnID, 整数型
 
-    返回 (WSS是否在线 (pServer, dwConnID))
+    返回 (WSS是否在线 (m_pServer, dwConnID))
     
 
 .子程序 _取客户地址, 文本型, 公开
@@ -63,12 +66,12 @@
     .局部变量 addr, 文本型
     .局部变量 port, 整数型
 
-    WSS取客户端地址 (pServer, dwConnID, addr, , port)
+    WSS取客户端地址 (m_pServer, dwConnID, addr, port)
     返回 (addr ＋ “:” ＋ 到文本 (port))
     
 
 .子程序 _是否运行中, 逻辑型, 公开
-    返回 (WSS是否启动 (pServer))
+    返回 (WSS是否启动 (m_pServer))
     
 
 .子程序 发送私聊消息, , 公开
@@ -86,7 +89,7 @@
     data.创建_空对象 ()
     data.置文本 (, “action”, “send_private_msg”)
     data.置JSON (, “params”, tmp.到JSON (#YYJSON_WRITE_ANSI))
-    WSS发送消息 (pServer, dwConnID, 1, 文本到UTF8 (data.到JSON (#YYJSON_WRITE_ANSI)))
+    WSS发送消息 (m_pServer, dwConnID, 1, 文本到UTF8 (data.到JSON (#YYJSON_WRITE_ANSI)))
     
 
 .子程序 发送群消息, , 公开
@@ -104,7 +107,7 @@
     data.创建_空对象 ()
     data.置文本 (, “action”, “send_group_msg”)
     data.置JSON (, “params”, tmp.到JSON (#YYJSON_WRITE_ANSI))
-    WSS发送消息 (pServer, dwConnID, 1, 文本到UTF8 (data.到JSON (#YYJSON_WRITE_ANSI)))
+    WSS发送消息 (m_pServer, dwConnID, 1, 文本到UTF8 (data.到JSON (#YYJSON_WRITE_ANSI)))
     
 
 .子程序 发送合并转发_群, , 公开
@@ -144,7 +147,7 @@
     data.创建_空对象 ()
     data.置文本 (, “action”, “send_group_forward_msg”)
     data.置JSON (, “params”, tmp.到JSON (#YYJSON_WRITE_ANSI))
-    WSS发送消息 (pServer, dwConnID, 1, 文本到UTF8 (data.到JSON (#YYJSON_WRITE_ANSI)))
+    WSS发送消息 (m_pServer, dwConnID, 1, 文本到UTF8 (data.到JSON (#YYJSON_WRITE_ANSI)))
     
 
 .子程序 撤回消息, , 公开
@@ -158,7 +161,7 @@
     data.创建_空对象 ()
     data.置文本 (, “action”, “delete_msg”)
     data.置JSON (, “params”, tmp.到JSON (#YYJSON_WRITE_ANSI))
-    WSS发送消息 (pServer, dwConnID, 1, 文本到UTF8 (data.到JSON (#YYJSON_WRITE_ANSI)))
+    WSS发送消息 (m_pServer, dwConnID, 1, 文本到UTF8 (data.到JSON (#YYJSON_WRITE_ANSI)))
     
 
 .子程序 处理加好友请求, , 公开
@@ -176,7 +179,7 @@
     data.创建_空对象 ()
     data.置文本 (, “action”, “set_friend_add_request”)
     data.置JSON (, “params”, tmp.到JSON (#YYJSON_WRITE_ANSI))
-    WSS发送消息 (pServer, dwConnID, 1, 文本到UTF8 (data.到JSON (#YYJSON_WRITE_ANSI)))
+    WSS发送消息 (m_pServer, dwConnID, 1, 文本到UTF8 (data.到JSON (#YYJSON_WRITE_ANSI)))
     
 
 .子程序 处理加群请求, , 公开
@@ -196,7 +199,7 @@
     data.创建_空对象 ()
     data.置文本 (, “action”, “set_group_add_request”)
     data.置JSON (, “params”, tmp.到JSON (#YYJSON_WRITE_ANSI))
-    WSS发送消息 (pServer, dwConnID, 1, 文本到UTF8 (data.到JSON (#YYJSON_WRITE_ANSI)))
+    WSS发送消息 (m_pServer, dwConnID, 1, 文本到UTF8 (data.到JSON (#YYJSON_WRITE_ANSI)))
     
 
 .子程序 设置群名片, , 公开
@@ -214,7 +217,7 @@
     data.创建_空对象 ()
     data.置文本 (, “action”, “set_group_card”)
     data.置JSON (, “params”, tmp.到JSON (#YYJSON_WRITE_ANSI))
-    WSS发送消息 (pServer, dwConnID, 1, 文本到UTF8 (data.到JSON (#YYJSON_WRITE_ANSI)))
+    WSS发送消息 (m_pServer, dwConnID, 1, 文本到UTF8 (data.到JSON (#YYJSON_WRITE_ANSI)))
     
 
 .子程序 群组踢人, , 公开
@@ -232,7 +235,7 @@
     data.创建_空对象 ()
     data.置文本 (, “action”, “set_group_kick”)
     data.置JSON (, “params”, tmp.到JSON (#YYJSON_WRITE_ANSI))
-    WSS发送消息 (pServer, dwConnID, 1, 文本到UTF8 (data.到JSON (#YYJSON_WRITE_ANSI)))
+    WSS发送消息 (m_pServer, dwConnID, 1, 文本到UTF8 (data.到JSON (#YYJSON_WRITE_ANSI)))
     
 
 .子程序 群组单人禁言, , 公开
@@ -250,7 +253,7 @@
     data.创建_空对象 ()
     data.置文本 (, “action”, “set_group_ban”)
     data.置JSON (, “params”, tmp.到JSON (#YYJSON_WRITE_ANSI))
-    WSS发送消息 (pServer, dwConnID, 1, 文本到UTF8 (data.到JSON (#YYJSON_WRITE_ANSI)))
+    WSS发送消息 (m_pServer, dwConnID, 1, 文本到UTF8 (data.到JSON (#YYJSON_WRITE_ANSI)))
     
 
 .子程序 群组全员禁言, , 公开
@@ -266,7 +269,7 @@
     data.创建_空对象 ()
     data.置文本 (, “action”, “set_group_whole_ban”)
     data.置JSON (, “params”, tmp.到JSON (#YYJSON_WRITE_ANSI))
-    WSS发送消息 (pServer, dwConnID, 1, 文本到UTF8 (data.到JSON (#YYJSON_WRITE_ANSI)))
+    WSS发送消息 (m_pServer, dwConnID, 1, 文本到UTF8 (data.到JSON (#YYJSON_WRITE_ANSI)))
     
 
 .子程序 退出群组, , 公开
@@ -282,7 +285,7 @@
     data.创建_空对象 ()
     data.置文本 (, “action”, “set_group_leave”)
     data.置JSON (, “params”, tmp.到JSON (#YYJSON_WRITE_ANSI))
-    WSS发送消息 (pServer, dwConnID, 1, 文本到UTF8 (data.到JSON (#YYJSON_WRITE_ANSI)))
+    WSS发送消息 (m_pServer, dwConnID, 1, 文本到UTF8 (data.到JSON (#YYJSON_WRITE_ANSI)))
     
 
 .子程序 HTTP获取好友列表, 文本型, 公开

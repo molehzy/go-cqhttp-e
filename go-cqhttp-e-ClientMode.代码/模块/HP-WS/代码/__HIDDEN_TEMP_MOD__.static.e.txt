@@ -1,7 +1,7 @@
 ﻿.版本 2
 
 .程序集 __HIDDEN_TEMP_MOD__, , 公开
-.子程序 WSS创建, 整数型, 公开, 创建Listener并返回pServer，可以多次创建pServer
+.子程序 WSS创建, 整数型, 公开, 创建pSender
     
 
 .子程序 WSS绑定事件, , 公开
@@ -11,85 +11,91 @@
 
     
 
-.子程序 WSS销毁Listener, , 公开, 先销毁全部pServer再销毁Listener
+.子程序 WSS销毁Server, , 公开, 销毁pServer
+    .参数 pSender, 整数型
+
     
 
 .子程序 WSS启动, 逻辑型, 公开
-    .参数 pServer, 整数型
+    .参数 pSender, 整数型
     .参数 Bind, 文本型, 可空, 为空默认:"0.0.0.0"
     .参数 Port, 整数型
 
     
 
 .子程序 WSS停止, 逻辑型, 公开
-    .参数 pServer, 整数型
+    .参数 pSender, 整数型
 
     
 
 .子程序 WSS断开, 逻辑型, 公开
-    .参数 pServer, 整数型
+    .参数 pSender, 整数型
     .参数 dwConnID, 整数型
     .参数 bForce, 逻辑型
 
     
 
 .子程序 WSS发送消息, 逻辑型, 公开
-    .参数 pServer, 整数型
+    .参数 pSender, 整数型
     .参数 dwConnID, 整数型, , 连接 ID
     .参数 iOperationCode, 字节型, , 操作码：0x0 - 0xF
     .参数 pData, 字节集, 可空, 消息体数据缓冲区
-    .参数 ullBodyLen, 长整数型, 可空, 消息总长度 
+    .参数 ullBodyLen, 整数型, 可空, 消息总长度 
 
     
 
 .子程序 WSS取错误信息, 文本型, 公开
-    .参数 pServer, 整数型
+    .参数 pSender, 整数型
 
     
 
 .子程序 WSS取错误代码, 整数型, 公开
-    .参数 pServer, 整数型
+    .参数 pSender, 整数型
 
     
 
 .子程序 WSS取连接数, 整数型, 公开
-    .参数 pServer, 整数型
+    .参数 pSender, 整数型
 
     
 
-.子程序 WSS取请求头, 逻辑型, 公开
-    .参数 pServer, 整数型
+.子程序 WSS取连接时长, 逻辑型, 公开, 毫秒
+    .参数 pSender, 整数型
+    .参数 dwConnID, 整数型
+    .参数 pdwPeriod, 整数型, 参考
+
+    
+
+.子程序 WSS取请求头, 文本型, 公开
+    .参数 pSender, 整数型
     .参数 dwConnID, 整数型
     .参数 lpszName, 文本型
-    .参数 lpszValue, 文本型, 参考
 
     
 
 .子程序 WSS取请求头S, 逻辑型, 公开
-    .参数 pServer, 整数型
+    .参数 pSender, 整数型
     .参数 dwConnID, 整数型
     .参数 lpszName, 文本型
     .参数 lpszValue, 文本型, 参考 数组
-    .参数 pdwCount, 整数型
 
     
 
 .子程序 WSS取客户端地址, 逻辑型, 公开
-    .参数 pServer, 整数型
+    .参数 pSender, 整数型
     .参数 dwConnID, 整数型
     .参数 lpszAddress, 文本型, 参考
-    .参数 iAddressLen, 整数型, 参考 可空
     .参数 pusPort, 整数型, 参考
 
     
 
 .子程序 WSS是否启动, 逻辑型, 公开
-    .参数 pServer, 整数型
+    .参数 pSender, 整数型
 
     
 
 .子程序 WSS是否在线, 逻辑型, 公开
-    .参数 pServer, 整数型
+    .参数 pSender, 整数型
     .参数 dwConnID, 整数型
 
     
@@ -117,13 +123,12 @@
 
     
 
-.子程序 WSS销毁pSerevr, , 公开, 先销毁全部pServer再销毁Listener
-    .参数 pSerevr, 整数型
-
+.子程序 WSS销毁Listener, , 公开, 请先销毁所有pServer
     
 
-.子程序 WSC创建, 整数型, 公开, 创建Listener并返回pClient，可以多次创建pClient
+.子程序 WSC创建, 整数型, 公开, 创建pClient
     .参数 地址, 文本型, , ws://...或wss://...
+    .参数 协议头, Header, 可空 数组
 
     
 
@@ -134,12 +139,12 @@
 
     
 
-.子程序 WSC销毁Listener, , 公开, 先销毁全部pClient再销毁Listener
-    
-
-.子程序 WSC销毁pClient, , 公开, 先销毁全部pClient再销毁Listener
+.子程序 WSC销毁Client, , 公开, 销毁pClient
     .参数 pClient, 整数型
 
+    
+
+.子程序 WSC销毁Listener, , 公开, 请先销毁所有pClient
     
 
 .子程序 WSC连接, 逻辑型, 公开
@@ -157,6 +162,21 @@
     .参数 pClient, 整数型
     .参数 iOperationCode, 字节型
     .参数 pData, 字节集, 可空
+
+    
+
+.子程序 WSC取错误信息, 文本型, 公开
+    .参数 pClient, 整数型
+
+    
+
+.子程序 WSC取错误代码, 整数型, 公开
+    .参数 pClient, 整数型
+
+    
+
+.子程序 WSC是否连接, 逻辑型, 公开
+    .参数 pClient, 整数型
 
     
 
@@ -180,27 +200,6 @@
     .参数 iOperationCode, 字节型
     .参数 pData, 整数型
     .参数 Len, 整数型
-
-    
-
-.子程序 WSC取错误信息, 文本型, 公开
-    .参数 pClient, 整数型
-
-    
-
-.子程序 WSC取错误代码, 整数型, 公开
-    .参数 pClient, 整数型
-
-    
-
-.子程序 WSC置请求头, , 公开, 在连接前设置
-    .参数 pClient, 整数型
-    .参数 请求头, TNVPair, 数组
-
-    
-
-.子程序 WSC是否连接, 逻辑型, 公开
-    .参数 pClient, 整数型
 
     
 

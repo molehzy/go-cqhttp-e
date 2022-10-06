@@ -3,7 +3,7 @@
     "Author": "molehzy",
     "BuilderVersion": {
         "Major": 0,
-        "Minor": 2
+        "Minor": 0
     },
     "CompilePlugins": "",
     "Copyright": "",
@@ -14,7 +14,7 @@
     "Homepage": "https://github.com/molehzy/go-cqhttp-e",
     "Name": "go-cqhttp-e-ServerMode",
     "ReleaseVersion": {
-        "Major": 1,
+        "Major": 2,
         "Minor": 0
     },
     "TelephoneNumber": "",

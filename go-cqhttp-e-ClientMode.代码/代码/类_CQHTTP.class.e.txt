@@ -1,6 +1,7 @@
 ﻿.版本 2
 
 .程序集 类_CQHTTP, , 公开
+.程序集变量 m_pClient, 整数型
 .程序集变量 协议头, 文本型
 
 .子程序 _初始化, , , 当基于本类的对象被创建后，此方法会被自动调用
@@ -8,6 +9,8 @@
 
 .子程序 _销毁, , , 当基于本类的对象被销毁前，此方法会被自动调用
     断开 ()
+    WSC销毁Client (m_pClient)
+    WSC销毁Listener ()
     
 
 .子程序 初始化, 逻辑型, 公开, 必须在代码开头执行且仅执行一次
@@ -18,19 +21,18 @@
     .参数 通知消息回传, 子程序指针, , 见程序"_notice"
     .参数 请求消息回传, 子程序指针, , 见程序"_request"
     .参数 WS消息回传, 子程序指针, , 见程序"_ws"
-    .局部变量 hd, TNVPair, , "1"
+    .局部变量 hd, Header, , "1"
 
-    .如果真 (pClient ＝ 0)
-        pClient ＝ WSC创建 (WS地址)
+    .如果真 (m_pClient ＝ 0)
+        .如果真 (取反 (是否为空 (Token)))
+            hd [1].name ＝ “Authorization”
+            hd [1].value ＝ “Bearer ” ＋ Token
+            协议头 ＝ 文本替换 (#协议头, 23, 1, Token)
+        .如果真结束
         
-        .如果真 (pClient ≠ 0)
-            .如果真 (取反 (是否为空 (Token)))
-                hd [1].name ＝ “Authorization”
-                hd [1].value ＝ “Bearer ” ＋ Token
-                WSC置请求头 (pClient, hd)
-                协议头 ＝ 文本替换 (#协议头, 23, 1, Token)
-            .如果真结束
-            
+        m_pClient ＝ WSC创建 (WS地址, hd)
+        
+        .如果真 (m_pClient ≠ 0)
             私聊消息 ＝ 私聊消息回传
             群聊消息 ＝ 群聊消息回传
             通知消息 ＝ 通知消息回传
@@ -38,7 +40,6 @@
             WS消息 ＝ WS消息回传
             WSC绑定事件 (&WS收到消息, &WS连接成功, &WS断开连接)
             返回 (真)
-            
         .如果真结束
         返回 (假)
     .如果真结束
@@ -46,11 +47,11 @@
     
 
 .子程序 连接, 逻辑型, 公开, 此方法为阻塞模式,连接成功返回真
-    返回 (WSC连接 (pClient, 假))
+    返回 (WSC连接 (m_pClient, 假))
     
 
 .子程序 断开, 逻辑型, 公开
-    返回 (WSC断开 (pClient))
+    返回 (WSC断开 (m_pClient))
     
 
 .子程序 发送私聊消息, , 公开
@@ -67,7 +68,7 @@
     data.创建_空对象 ()
     data.置文本 (, “action”, “send_private_msg”)
     data.置JSON (, “params”, tmp.到JSON (#YYJSON_WRITE_ANSI))
-    WSC发送消息 (pClient, 1, 文本到UTF8 (data.到JSON (#YYJSON_WRITE_ANSI)))
+    WSC发送消息 (m_pClient, 1, 文本到UTF8 (data.到JSON (#YYJSON_WRITE_ANSI)))
     
 
 .子程序 发送群消息, , 公开
@@ -84,7 +85,7 @@
     data.创建_空对象 ()
     data.置文本 (, “action”, “send_group_msg”)
     data.置JSON (, “params”, tmp.到JSON (#YYJSON_WRITE_ANSI))
-    WSC发送消息 (pClient, 1, 文本到UTF8 (data.到JSON (#YYJSON_WRITE_ANSI)))
+    WSC发送消息 (m_pClient, 1, 文本到UTF8 (data.到JSON (#YYJSON_WRITE_ANSI)))
     
 
 .子程序 发送合并转发_群, , 公开
@@ -123,7 +124,7 @@
     data.创建_空对象 ()
     data.置文本 (, “action”, “send_group_forward_msg”)
     data.置JSON (, “params”, tmp.到JSON (#YYJSON_WRITE_ANSI))
-    WSC发送消息 (pClient, 1, 文本到UTF8 (data.到JSON (#YYJSON_WRITE_ANSI)))
+    WSC发送消息 (m_pClient, 1, 文本到UTF8 (data.到JSON (#YYJSON_WRITE_ANSI)))
     
 
 .子程序 撤回消息, , 公开
@@ -136,7 +137,7 @@
     data.创建_空对象 ()
     data.置文本 (, “action”, “delete_msg”)
     data.置JSON (, “params”, tmp.到JSON (#YYJSON_WRITE_ANSI))
-    WSC发送消息 (pClient, 1, 文本到UTF8 (data.到JSON (#YYJSON_WRITE_ANSI)))
+    WSC发送消息 (m_pClient, 1, 文本到UTF8 (data.到JSON (#YYJSON_WRITE_ANSI)))
     
 
 .子程序 处理加好友请求, , 公开
@@ -153,7 +154,7 @@
     data.创建_空对象 ()
     data.置文本 (, “action”, “set_friend_add_request”)
     data.置JSON (, “params”, tmp.到JSON (#YYJSON_WRITE_ANSI))
-    WSC发送消息 (pClient, 1, 文本到UTF8 (data.到JSON (#YYJSON_WRITE_ANSI)))
+    WSC发送消息 (m_pClient, 1, 文本到UTF8 (data.到JSON (#YYJSON_WRITE_ANSI)))
     
 
 .子程序 处理加群请求, , 公开
@@ -172,7 +173,7 @@
     data.创建_空对象 ()
     data.置文本 (, “action”, “set_group_add_request”)
     data.置JSON (, “params”, tmp.到JSON (#YYJSON_WRITE_ANSI))
-    WSC发送消息 (pClient, 1, 文本到UTF8 (data.到JSON (#YYJSON_WRITE_ANSI)))
+    WSC发送消息 (m_pClient, 1, 文本到UTF8 (data.到JSON (#YYJSON_WRITE_ANSI)))
     
 
 .子程序 设置群名片, , 公开
@@ -189,7 +190,7 @@
     data.创建_空对象 ()
     data.置文本 (, “action”, “set_group_card”)
     data.置JSON (, “params”, tmp.到JSON (#YYJSON_WRITE_ANSI))
-    WSC发送消息 (pClient, 1, 文本到UTF8 (data.到JSON (#YYJSON_WRITE_ANSI)))
+    WSC发送消息 (m_pClient, 1, 文本到UTF8 (data.到JSON (#YYJSON_WRITE_ANSI)))
     
 
 .子程序 群组踢人, , 公开
@@ -206,7 +207,7 @@
     data.创建_空对象 ()
     data.置文本 (, “action”, “set_group_kick”)
     data.置JSON (, “params”, tmp.到JSON (#YYJSON_WRITE_ANSI))
-    WSC发送消息 (pClient, 1, 文本到UTF8 (data.到JSON (#YYJSON_WRITE_ANSI)))
+    WSC发送消息 (m_pClient, 1, 文本到UTF8 (data.到JSON (#YYJSON_WRITE_ANSI)))
     
 
 .子程序 群组单人禁言, , 公开
@@ -223,7 +224,7 @@
     data.创建_空对象 ()
     data.置文本 (, “action”, “set_group_ban”)
     data.置JSON (, “params”, tmp.到JSON (#YYJSON_WRITE_ANSI))
-    WSC发送消息 (pClient, 1, 文本到UTF8 (data.到JSON (#YYJSON_WRITE_ANSI)))
+    WSC发送消息 (m_pClient, 1, 文本到UTF8 (data.到JSON (#YYJSON_WRITE_ANSI)))
     
 
 .子程序 群组全员禁言, , 公开
@@ -238,7 +239,7 @@
     data.创建_空对象 ()
     data.置文本 (, “action”, “set_group_whole_ban”)
     data.置JSON (, “params”, tmp.到JSON (#YYJSON_WRITE_ANSI))
-    WSC发送消息 (pClient, 1, 文本到UTF8 (data.到JSON (#YYJSON_WRITE_ANSI)))
+    WSC发送消息 (m_pClient, 1, 文本到UTF8 (data.到JSON (#YYJSON_WRITE_ANSI)))
     
 
 .子程序 退出群组, , 公开
@@ -253,7 +254,7 @@
     data.创建_空对象 ()
     data.置文本 (, “action”, “set_group_leave”)
     data.置JSON (, “params”, tmp.到JSON (#YYJSON_WRITE_ANSI))
-    WSC发送消息 (pClient, 1, 文本到UTF8 (data.到JSON (#YYJSON_WRITE_ANSI)))
+    WSC发送消息 (m_pClient, 1, 文本到UTF8 (data.到JSON (#YYJSON_WRITE_ANSI)))
     
 
 .子程序 HTTP获取好友列表, 文本型, 公开
@@ -307,7 +308,7 @@
     .判断结束
     
 
-.子程序 HTTP发送私聊消息, 文本型, 公开, 成功返回消息ID
+.子程序 HTTP发送私聊消息, 长整数型, 公开, 成功返回消息ID
     .参数 HTTP地址, 文本型, , 示例：127.0.0.1:5700
     .参数 user_id, 文本型, , 对方 QQ 号
     .参数 message, 文本型, , 要发送的内容
@@ -323,13 +324,13 @@
     res ＝ 编码_Utf8到Ansi (网页_访问_对象 (“http://” ＋ HTTP地址 ＋ “/send_private_msg”, 1, data.到JSON (#YYJSON_WRITE_ANSI), , , 协议头))
     tmp.解析 (res, #YYJSON_READ_ANSI)
     .判断开始 (data.取文本 (, “status”) ＝ “ok”)
-        返回 (data.通配_取文本 (, “/data/message_id”))
+        返回 (data.通配_取长整数 (, “/data/message_id”))
     .默认
-        返回 (“failed”)
+        返回 (0)
     .判断结束
     
 
-.子程序 HTTP发送群消息, 文本型, 公开, 成功返回消息ID
+.子程序 HTTP发送群消息, 长整数型, 公开, 成功返回消息ID
     .参数 HTTP地址, 文本型, , 示例：127.0.0.1:5700
     .参数 group_id, 文本型, , 群号
     .参数 message, 文本型, , 要发送的内容
@@ -345,9 +346,9 @@
     res ＝ 编码_Utf8到Ansi (网页_访问_对象 (“http://” ＋ HTTP地址 ＋ “/send_group_msg”, 1, data.到JSON (#YYJSON_WRITE_ANSI), , , 协议头))
     tmp.解析 (res, #YYJSON_READ_ANSI)
     .判断开始 (data.取文本 (, “status”) ＝ “ok”)
-        返回 (data.通配_取文本 (, “/data/message_id”))
+        返回 (data.通配_取长整数 (, “/data/message_id”))
     .默认
-        返回 (“failed”)
+        返回 (0)
     .判断结束
     
 

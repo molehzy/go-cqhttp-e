@@ -127,7 +127,7 @@
     .参数 enOperation, 整数型
     .参数 iErrorCode, 整数型
 
-    调用子程序 (WS消息, , , dwConnID, “客户端退出”)
+    调用子程序 (WS消息, , , dwConnID, “客户端退出, iErrorCode:” ＋ 到文本 (iErrorCode))
     
 
 .子程序 _private, , 公开, 私聊消息,示例代码
