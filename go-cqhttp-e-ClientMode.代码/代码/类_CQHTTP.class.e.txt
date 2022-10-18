@@ -8,9 +8,7 @@
     
 
 .子程序 _销毁, , , 当基于本类的对象被销毁前，此方法会被自动调用
-    断开 ()
-    WSC销毁Client (m_pClient)
-    WSC销毁Listener ()
+    销毁 ()
     
 
 .子程序 初始化, 逻辑型, 公开, 必须在代码开头执行且仅执行一次
@@ -44,6 +42,13 @@
         返回 (假)
     .如果真结束
     返回 (假)
+    
+
+.子程序 销毁, , 公开
+    断开 ()
+    WSC销毁Client (m_pClient)
+    WSC销毁Listener ()
+    m_pClient ＝ 0
     
 
 .子程序 连接, 逻辑型, 公开, 此方法为阻塞模式,连接成功返回真
@@ -270,9 +275,9 @@
     data.解析 (tmp, #YYJSON_READ_ANSI)
     .判断开始 (data.取文本 (, “status”) ＝ “ok”)
         .计次循环首 (data.取成员数 (, “data”), 计次)
-            临时列表.user_id ＝ data.通配_取文本 (, “/data/” ＋ 到文本 (计次) ＋ “/user_id”)
-            临时列表.nickname ＝ data.通配_取文本 (, “/data/” ＋ 到文本 (计次) ＋ “/nickname”)
-            临时列表.remark ＝ data.通配_取文本 (, “/data/” ＋ 到文本 (计次) ＋ “/remark”)
+            临时列表.user_id ＝ 到文本 (data.通配_取长整数 (, “/data/” ＋ 到文本 (计次 － 1) ＋ “/user_id”))
+            临时列表.nickname ＝ data.通配_取文本 (, “/data/” ＋ 到文本 (计次 － 1) ＋ “/nickname”)
+            临时列表.remark ＝ data.通配_取文本 (, “/data/” ＋ 到文本 (计次 － 1) ＋ “/remark”)
             加入成员 (临时列表2, 临时列表)
         .计次循环尾 ()
         好友列表 ＝ 临时列表2
@@ -295,10 +300,10 @@
     data.解析 (tmp, #YYJSON_READ_ANSI)
     .判断开始 (data.取文本 (, “status”) ＝ “ok”)
         .计次循环首 (data.取成员数 (, “data”), 计次)
-            临时列表.group_id ＝ data.通配_取文本 (, “/data/” ＋ 到文本 (计次) ＋ “/group_id”)
-            临时列表.group_name ＝ data.通配_取文本 (, “/data/” ＋ 到文本 (计次) ＋ “/group_name”)
-            临时列表.member_count ＝ data.通配_取文本 (, “/data/” ＋ 到文本 (计次) ＋ “/member_count”)
-            临时列表.max_member_count ＝ data.通配_取文本 (, “/data/” ＋ 到文本 (计次) ＋ “/max_member_count”)
+            临时列表.group_id ＝ 到文本 (data.通配_取长整数 (, “/data/” ＋ 到文本 (计次 － 1) ＋ “/group_id”))
+            临时列表.group_name ＝ data.通配_取文本 (, “/data/” ＋ 到文本 (计次 － 1) ＋ “/group_name”)
+            临时列表.member_count ＝ 到文本 (data.通配_取整数 (, “/data/” ＋ 到文本 (计次 － 1) ＋ “/member_count”))
+            临时列表.max_member_count ＝ 到文本 (data.通配_取整数 (, “/data/” ＋ 到文本 (计次 － 1) ＋ “/max_member_count”))
             加入成员 (临时列表2, 临时列表)
         .计次循环尾 ()
         群列表 ＝ 临时列表2
@@ -323,8 +328,8 @@
     data.置逻辑 (, “auto_escape”, auto_escape)
     res ＝ 编码_Utf8到Ansi (网页_访问_对象 (“http://” ＋ HTTP地址 ＋ “/send_private_msg”, 1, data.到JSON (#YYJSON_WRITE_ANSI), , , 协议头))
     tmp.解析 (res, #YYJSON_READ_ANSI)
-    .判断开始 (data.取文本 (, “status”) ＝ “ok”)
-        返回 (data.通配_取长整数 (, “/data/message_id”))
+    .判断开始 (tmp.取文本 (, “status”) ＝ “ok”)
+        返回 (tmp.通配_取长整数 (, “/data/message_id”))
     .默认
         返回 (0)
     .判断结束
@@ -345,8 +350,8 @@
     data.置逻辑 (, “auto_escape”, auto_escape)
     res ＝ 编码_Utf8到Ansi (网页_访问_对象 (“http://” ＋ HTTP地址 ＋ “/send_group_msg”, 1, data.到JSON (#YYJSON_WRITE_ANSI), , , 协议头))
     tmp.解析 (res, #YYJSON_READ_ANSI)
-    .判断开始 (data.取文本 (, “status”) ＝ “ok”)
-        返回 (data.通配_取长整数 (, “/data/message_id”))
+    .判断开始 (tmp.取文本 (, “status”) ＝ “ok”)
+        返回 (tmp.通配_取长整数 (, “/data/message_id”))
     .默认
         返回 (0)
     .判断结束
